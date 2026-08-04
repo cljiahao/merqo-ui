@@ -37,6 +37,7 @@ export interface AccountMenuProps {
   feedbackMetric?: string;
   /** Optional hook for a consuming kit's own toast/notification on async failure (e.g. a failed sign-out). */
   onError?: (error: unknown) => void;
+  extraLink?: { href: string; label: string };
 }
 
 function toErrorMessage(error: unknown): string {
@@ -67,6 +68,7 @@ export function AccountMenu({
   feedbackSource,
   feedbackMetric,
   onError,
+  extraLink,
 }: AccountMenuProps) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [feedbackOpen, setFeedbackOpen] = React.useState(false);
@@ -145,6 +147,12 @@ export function AccountMenu({
           <DropdownMenuItem onSelect={() => setFeedbackOpen(true)}>
             Feedback
           </DropdownMenuItem>
+
+          {extraLink ? (
+            <DropdownMenuItem asChild>
+              <a href={extraLink.href}>{extraLink.label}</a>
+            </DropdownMenuItem>
+          ) : null}
 
           <DropdownMenuSeparator />
 

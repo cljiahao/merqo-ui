@@ -196,4 +196,18 @@ describe("AccountMenu", () => {
     expect(trigger.textContent?.trim()).toBe("");
     expect(trigger.querySelector("svg")).toBeInTheDocument();
   });
+
+  it("does not render an extra link when extraLink is not set", async () => {
+    await openMenu();
+    await screen.findByRole("menuitem", { name: /feedback/i });
+    expect(
+      screen.queryByRole("menuitem", { name: /go to admin/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders extraLink as a menu item linking to the given href when provided", async () => {
+    await openMenu({ extraLink: { href: "/admin", label: "Go to admin" } });
+    const link = await screen.findByRole("menuitem", { name: /go to admin/i });
+    expect(link).toHaveAttribute("href", "/admin");
+  });
 });
