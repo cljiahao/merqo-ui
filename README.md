@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.1.1"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.2.0"
 }
 ```
 
@@ -63,12 +63,28 @@ private repo. Set this up before wiring any kit's CI or deploy pipeline to
 install `@merqo/ui`, or the install step will fail there even though it
 works locally.
 
-## v1 components
+## Components
 
 - `InfoTooltip` — icon + tooltip with a parameterized `aria-label`.
 - `useAsyncAction` — pending-state hook that always resets, even on throw.
 - `TwoColumnSections` — the profile/settings two-column flex-stack layout
   (never a CSS grid — see the component's test file for why).
+- `Section` — visually-neutral field-group shell (icon, eyebrow, title,
+  optional description/tooltip). Kit-specific skins (e.g. a paper texture)
+  layer on top via `className`, not baked into the component.
+- `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
+  `HelpSheet` supports a plain `mailto:` mode for kits with no
+  ticket-queue infra yet, or a real form mode.
+- `AccountMenu` — the avatar dropdown alone (Profile, optional kit-local
+  settings, optional Plan, Get help, Feedback, Sign out — always last,
+  separated, destructive-styled). Reusable without the full nav shell.
+- `DashboardNav` — the full sticky-topbar shell (burger-left/avatar-right
+  at every viewport). Composes `AccountMenu`.
+- `ProfileForm` — the full profile/settings page composition (stall/shop
+  name → photo → password | display name → social links), each section
+  independently saved. Never calls a backend directly — every mutation is
+  an injected prop, so this component isn't coupled to any one kit's data
+  layer.
 
 ## Usage
 
