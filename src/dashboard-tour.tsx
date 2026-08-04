@@ -104,7 +104,7 @@ export function DashboardTour({
       type="button"
       onClick={() => void startTour()}
       aria-label="Replay tour"
-      className="bg-primary text-primary-foreground ring-black/5 fixed right-5 bottom-5 z-40 inline-flex size-12 items-center justify-center rounded-full shadow-lg ring-1"
+      className="bg-primary text-primary-foreground ring-border fixed right-5 bottom-5 z-40 inline-flex size-12 items-center justify-center rounded-full shadow-lg ring-1"
     >
       <HelpCircle className="size-5" />
     </button>
