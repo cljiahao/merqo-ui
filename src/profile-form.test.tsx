@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ProfileForm } from "./profile-form";
 
@@ -15,8 +15,24 @@ function makeProps(overrides: Partial<Parameters<typeof ProfileForm>[0]> = {}) {
     onSaveDisplayName: vi.fn().mockResolvedValue(undefined),
     onSaveAvatar: vi.fn().mockResolvedValue(undefined),
     onSavePassword: vi.fn().mockResolvedValue(undefined),
+    avatarBucket: "vendor-avatars",
+    avatarPathPrefix: "vendor-123",
+    onAvatarUpload: vi.fn().mockResolvedValue("https://cdn.example.test/avatar.jpg"),
     ...overrides,
   };
+}
+
+function avatarFileInput(container: HTMLElement): HTMLInputElement {
+  const input = container.querySelector('input[type="file"]');
+  if (!input) throw new Error("no avatar file input rendered");
+  return input as HTMLInputElement;
+}
+
+async function uploadAvatarFile(container: HTMLElement, file: File) {
+  const input = avatarFileInput(container);
+  await act(async () => {
+    fireEvent.change(input, { target: { files: [file] } });
+  });
 }
 
 describe("ProfileForm", () => {
@@ -252,8 +268,8 @@ describe("ProfileForm", () => {
     expect(screen.getByText(/enter a display name/i)).toBeInTheDocument();
   });
 
-  it("I6: renders the given avatarUrl as a preview image in the Profile picture section", () => {
-    render(
+  it("I6: renders the given avatarUrl as a preview (via ImageUploader) in the Profile picture section", () => {
+    const { container } = render(
       <ProfileForm
         {...makeProps({
           initial: {
@@ -265,13 +281,15 @@ describe("ProfileForm", () => {
         })}
       />,
     );
-    const avatar = screen.getByRole("img", { name: /current profile photo/i });
+    const avatar = container.querySelector("img");
     expect(avatar).toHaveAttribute("src", "https://example.com/avatar.png");
+    expect(screen.getByRole("button", { name: "Remove image" })).toBeInTheDocument();
   });
 
-  it("I6: renders a placeholder (no broken img) when avatarUrl is undefined", () => {
+  it("I6: renders the ImageUploader upload trigger (no preview) when avatarUrl is undefined", () => {
     render(<ProfileForm {...makeProps()} />);
-    expect(screen.queryByRole("img", { name: /current profile photo/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add photo/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove image" })).not.toBeInTheDocument();
   });
 
   it("C3: surfaces an inline error and calls onError when the stall name save rejects", async () => {
@@ -314,17 +332,89 @@ describe("ProfileForm", () => {
   });
 
   it("C3: surfaces an inline error when the avatar save rejects", async () => {
-    const user = userEvent.setup();
     const props = makeProps({
       onSaveAvatar: vi.fn().mockRejectedValue(new Error("avatar save failed")),
+      onAvatarUpload: vi.fn().mockResolvedValue("https://cdn.example.test/avatar.jpg"),
     });
-    render(<ProfileForm {...props} />);
+    const { container } = render(<ProfileForm {...props} />);
 
     const file = new File(["hello"], "avatar.png", { type: "image/png" });
-    await user.upload(screen.getByLabelText("Photo"), file);
-    await user.click(screen.getByRole("button", { name: /save photo/i }));
+    await uploadAvatarFile(container, file);
 
     expect(await screen.findByText("avatar save failed")).toBeInTheDocument();
+  });
+
+  it("renders ImageUploader in the avatar section, wired to the avatar* props", () => {
+    render(
+      <ProfileForm
+        {...makeProps({
+          avatarBucket: "vendor-avatars",
+          avatarPathPrefix: "vendor-123",
+          onAvatarUpload: vi.fn(),
+        })}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /add photo/i })).toBeInTheDocument();
+  });
+
+  it("calls onSaveAvatar with the uploaded URL, not a raw File", async () => {
+    const onSaveAvatar = vi.fn().mockResolvedValue(undefined);
+    const onAvatarUpload = vi.fn().mockResolvedValue("https://cdn.example.test/uploaded.jpg");
+    const { container } = render(
+      <ProfileForm
+        {...makeProps({
+          onSaveAvatar,
+          avatarBucket: "vendor-avatars",
+          avatarPathPrefix: "vendor-123",
+          onAvatarUpload,
+        })}
+      />,
+    );
+
+    const file = new File(["hello"], "avatar.png", { type: "image/png" });
+    await uploadAvatarFile(container, file);
+
+    await waitFor(() =>
+      expect(onSaveAvatar).toHaveBeenCalledWith("https://cdn.example.test/uploaded.jpg"),
+    );
+    expect(onSaveAvatar).not.toHaveBeenCalledWith(file);
+  });
+
+  it("saving social links includes facebook and tiktok fields", async () => {
+    const onSaveStallIdentity = vi.fn().mockResolvedValue(undefined);
+    render(
+      <ProfileForm
+        {...makeProps({
+          onSaveStallIdentity,
+          initial: {
+            stallName: "Manfred's Coffee Cart",
+            socialLinks: {
+              website: "https://a.com",
+              facebook: "https://fb.com/a",
+              tiktok: "https://tiktok.com/@a",
+            },
+            displayName: "Manfred",
+            avatarUrl: undefined,
+          },
+        })}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: /save social links/i }));
+    expect(onSaveStallIdentity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        socialLinks: expect.objectContaining({
+          website: "https://a.com",
+          facebook: "https://fb.com/a",
+          tiktok: "https://tiktok.com/@a",
+        }),
+      }),
+    );
+  });
+
+  it("social links form has facebook and tiktok inputs", () => {
+    render(<ProfileForm {...makeProps()} />);
+    expect(screen.getByLabelText(/facebook/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/tiktok/i)).toBeInTheDocument();
   });
 
   it("C3: surfaces an inline error when the password save rejects", async () => {

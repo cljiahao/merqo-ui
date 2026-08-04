@@ -7,10 +7,18 @@ import { AtSign, Globe, Image as ImageIcon, KeyRound, Store, User } from "lucide
 import { Section } from "./section";
 import { TwoColumnSections } from "./two-column-sections";
 import { useAsyncAction } from "./use-async-action";
+import {
+  ImageUploader,
+  type ImageResizeResult,
+  type ImageUploaderVariant,
+  type ImageUploadPayload,
+} from "./image-uploader";
 
 export interface SocialLinks {
   instagram?: string;
   website?: string;
+  facebook?: string;
+  tiktok?: string;
 }
 
 export interface ProfileFormInitial {
@@ -28,8 +36,27 @@ export interface ProfileFormProps {
     socialLinks: SocialLinks;
   }) => Promise<void>;
   onSaveDisplayName: (name: string) => Promise<void>;
-  onSaveAvatar: (file: File) => Promise<void>;
+  onSaveAvatar: (url: string | null) => Promise<void>;
   onSavePassword: (newPassword: string) => Promise<void>;
+  /** Storage bucket for the avatar image, forwarded to `ImageUploader`. */
+  avatarBucket: string;
+  /** Directory-style prefix for the generated avatar object path. */
+  avatarPathPrefix: string;
+  /**
+   * Performs the actual avatar storage write and resolves the final public
+   * URL. Mirrors `ImageUploader`'s own `onUpload` prop exactly.
+   */
+  onAvatarUpload: (payload: ImageUploadPayload) => Promise<string>;
+  /** Optional browser-side resize/re-encode step for the avatar image. */
+  resizeAvatarImage?: (file: File, maxDim: number) => Promise<ImageResizeResult>;
+  /** Avatar source-file size cap in bytes. Default 15 MB (see `ImageUploader`). */
+  avatarMaxBytes?: number;
+  /** Avatar image variant. Default "thumb". */
+  avatarVariant?: ImageUploaderVariant;
+  /** Longest-side target handed to `resizeAvatarImage`. Defaults per variant. */
+  avatarMaxDim?: number;
+  /** Optional hook for a consuming kit's own toast/notification on avatar upload failure. */
+  onAvatarError?: (error: unknown) => void;
   /** Optional hook for a consuming kit's own toast/notification on async failure. */
   onError?: (error: unknown) => void;
 }
@@ -80,6 +107,14 @@ export function ProfileForm({
   onSaveDisplayName,
   onSaveAvatar,
   onSavePassword,
+  avatarBucket,
+  avatarPathPrefix,
+  onAvatarUpload,
+  resizeAvatarImage,
+  avatarMaxBytes,
+  avatarVariant,
+  avatarMaxDim,
+  onAvatarError,
   onError,
 }: ProfileFormProps) {
   const [stallName, setStallName] = React.useState(initial.stallName);
@@ -124,8 +159,8 @@ export function ProfileForm({
   const displayNameSave = useAsyncAction(async (name: string) => {
     await onSaveDisplayName(name);
   });
-  const avatarSave = useAsyncAction(async (file: File) => {
-    await onSaveAvatar(file);
+  const avatarSave = useAsyncAction(async (url: string | null) => {
+    await onSaveAvatar(url);
   });
   const passwordSave = useAsyncAction(async (newPassword: string) => {
     await onSavePassword(newPassword);
@@ -134,7 +169,7 @@ export function ProfileForm({
 
   const columnOne = (
     <>
-      <Section icon={Store} eyebrow="Shown to customers" title={stallNameLabel}>
+      <Section icon={<Store className="size-5" />} eyebrow="Shown to customers" title={stallNameLabel}>
         <form
           className="flex flex-col gap-3"
           onSubmit={(event) => {
@@ -171,43 +206,25 @@ export function ProfileForm({
         </form>
       </Section>
 
-      <Section icon={ImageIcon} eyebrow="Shown to customers" title="Profile picture">
-        <div className="flex items-center gap-3">
-          {initial.avatarUrl ? (
-            <img
-              src={initial.avatarUrl}
-              alt="Current profile photo"
-              className="size-12 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <span className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center rounded-full">
-              <User className="size-5" />
-            </span>
-          )}
-          <form
-            className="flex flex-1 flex-col gap-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const input = event.currentTarget.elements.namedItem(
-                "profile-avatar-file",
-              ) as HTMLInputElement;
-              const file = input.files?.[0];
-              if (file) avatarSave.run(file).catch((err) => onError?.(err));
-            }}
-          >
-            <label htmlFor="profile-avatar-file" className="text-sm font-medium">
-              Photo
-            </label>
-            <input id="profile-avatar-file" name="profile-avatar-file" type="file" accept="image/*" />
-            <FieldError
-              message={avatarSave.error ? toErrorMessage(avatarSave.error) : null}
-            />
-            <SaveButton pending={avatarSave.pending}>Save photo</SaveButton>
-          </form>
-        </div>
+      <Section icon={<ImageIcon className="size-5" />} eyebrow="Shown to customers" title="Profile picture">
+        <ImageUploader
+          bucket={avatarBucket}
+          pathPrefix={avatarPathPrefix}
+          value={initial.avatarUrl ?? null}
+          onChange={(url) => avatarSave.run(url).catch((err) => onError?.(err))}
+          onUpload={onAvatarUpload}
+          resizeImage={resizeAvatarImage}
+          maxBytes={avatarMaxBytes}
+          variant={avatarVariant}
+          maxDim={avatarMaxDim}
+          onError={onAvatarError}
+        />
+        <FieldError
+          message={avatarSave.error ? toErrorMessage(avatarSave.error) : null}
+        />
       </Section>
 
-      <Section icon={KeyRound} eyebrow="Sign-in security" title="Change password">
+      <Section icon={<KeyRound className="size-5" />} eyebrow="Sign-in security" title="Change password">
         <form
           className="flex flex-col gap-3"
           onSubmit={(event) => {
@@ -245,7 +262,7 @@ export function ProfileForm({
 
   const columnTwo = (
     <>
-      <Section icon={User} eyebrow="Just for you" title="Display name">
+      <Section icon={<User className="size-5" />} eyebrow="Just for you" title="Display name">
         <form
           className="flex flex-col gap-3"
           onSubmit={(event) => {
@@ -278,7 +295,7 @@ export function ProfileForm({
         </form>
       </Section>
 
-      <Section icon={AtSign} eyebrow="Shown to customers" title="Social links">
+      <Section icon={<AtSign className="size-5" />} eyebrow="Shown to customers" title="Social links">
         <form
           className="flex flex-col gap-3"
           onSubmit={(event) => {
@@ -312,6 +329,28 @@ export function ProfileForm({
             value={socialLinks.website ?? ""}
             onChange={(event) =>
               setSocialLinks((links) => ({ ...links, website: event.target.value }))
+            }
+            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          />
+          <label htmlFor="profile-facebook" className="text-sm font-medium">
+            Facebook
+          </label>
+          <input
+            id="profile-facebook"
+            value={socialLinks.facebook ?? ""}
+            onChange={(event) =>
+              setSocialLinks((links) => ({ ...links, facebook: event.target.value }))
+            }
+            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          />
+          <label htmlFor="profile-tiktok" className="text-sm font-medium">
+            TikTok
+          </label>
+          <input
+            id="profile-tiktok"
+            value={socialLinks.tiktok ?? ""}
+            onChange={(event) =>
+              setSocialLinks((links) => ({ ...links, tiktok: event.target.value }))
             }
             className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           />
