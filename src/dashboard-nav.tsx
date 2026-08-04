@@ -4,10 +4,13 @@ import * as React from "react";
 import { Menu } from "lucide-react";
 
 import { AccountMenu, type AccountMenuProps } from "./account-menu";
+import { cn } from "./lib/utils";
 
 export type DashboardNavProps = {
   wordmark: React.ReactNode;
   navLinks: { href: string; label: string }[];
+  isActiveHref?: (href: string) => boolean;
+  tourAnchor?: (href: string) => string;
 } & AccountMenuProps;
 
 const MOBILE_PANEL_ID = "dashboard-nav-mobile-panel";
@@ -15,6 +18,8 @@ const MOBILE_PANEL_ID = "dashboard-nav-mobile-panel";
 export function DashboardNav({
   wordmark,
   navLinks,
+  isActiveHref,
+  tourAnchor,
   ...accountMenuProps
 }: DashboardNavProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -38,6 +43,7 @@ export function DashboardNav({
             aria-label="Mobile navigation menu"
             aria-expanded={mobileOpen}
             aria-controls={MOBILE_PANEL_ID}
+            data-tour="nav-menu"
             className="focus-visible:ring-ring/50 inline-flex items-center justify-center rounded-md p-1.5 outline-none focus-visible:ring-2 sm:hidden"
             onClick={() => setMobileOpen((open) => !open)}
           >
@@ -49,7 +55,12 @@ export function DashboardNav({
               <a
                 key={link.href}
                 href={link.href}
-                className="text-muted-foreground hover:text-foreground text-sm font-medium"
+                data-tour={tourAnchor ? tourAnchor(link.href) : undefined}
+                aria-current={isActiveHref?.(link.href) ? "page" : undefined}
+                className={cn(
+                  "text-muted-foreground hover:text-foreground text-sm font-medium",
+                  isActiveHref?.(link.href) && "text-foreground",
+                )}
               >
                 {link.label}
               </a>
@@ -79,7 +90,12 @@ export function DashboardNav({
               <a
                 key={link.href}
                 href={link.href}
-                className="text-foreground rounded-md px-2 py-2 text-sm font-medium"
+                data-tour={tourAnchor ? tourAnchor(link.href) : undefined}
+                aria-current={isActiveHref?.(link.href) ? "page" : undefined}
+                className={cn(
+                  "text-foreground rounded-md px-2 py-2 text-sm font-medium",
+                  isActiveHref?.(link.href) && "text-foreground",
+                )}
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}

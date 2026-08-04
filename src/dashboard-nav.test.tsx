@@ -100,4 +100,50 @@ describe("DashboardNav", () => {
     const inlineLinks = screen.getAllByRole("link", { name: "Orders" });
     expect(inlineLinks.length).toBeGreaterThan(0);
   });
+
+  it("stamps data-tour=\"nav-menu\" on the mobile burger button", () => {
+    render(<DashboardNav {...baseProps} navLinks={[]} />);
+    expect(
+      screen.getByRole("button", { name: /mobile navigation menu/i }),
+    ).toHaveAttribute("data-tour", "nav-menu");
+  });
+
+  it("applies tourAnchor's return value as data-tour on each nav link when given", () => {
+    render(
+      <DashboardNav
+        {...baseProps}
+        navLinks={[{ href: "/dashboard", label: "Home" }]}
+        tourAnchor={(href) => `nav-${href.split("/").pop()}`}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute(
+      "data-tour",
+      "nav-dashboard",
+    );
+  });
+
+  it("does not set data-tour on links when tourAnchor is not given", () => {
+    render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
+    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("data-tour");
+  });
+
+  it("marks the active link via aria-current when isActiveHref returns true", () => {
+    render(
+      <DashboardNav
+        {...baseProps}
+        navLinks={[
+          { href: "/dashboard", label: "Home" },
+          { href: "/dashboard/stats", label: "Stats" },
+        ]}
+        isActiveHref={(href) => href === "/dashboard"}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Stats" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("no link has aria-current when isActiveHref is not given", () => {
+    render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
+    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("aria-current");
+  });
 });
