@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.3.0"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.4.0"
 }
 ```
 
@@ -110,32 +110,24 @@ behind an eslint-disable. A kit with its own wrapper (e.g. qkit's
 `MediaImage`, which marks `.svg` sources `unoptimized`) passes that wrapper
 as `imageComponent` instead.
 
-### `driver.js` CSS import (only if you use `DashboardTour`)
+### `driver.js` (only if you use `DashboardTour`)
 
-`DashboardTour` wires up `driver.js` for you, but it cannot bundle
-`driver.js`'s own base stylesheet — this package's build has no CSS
-loader (unlike your kit's own Next.js/webpack build, which already
-handles this). Import it once, wherever your kit already imports global
-CSS (e.g. alongside `globals.css` in your root layout):
-
-```ts
-import "driver.js/dist/driver.css";
-```
-
-Every kit already does this today for its own local tour component — if
-you're migrating an existing `dashboard-tour.tsx` to the shared one,
-keep this import, don't drop it.
+`DashboardTour` handles `driver.js` and its base stylesheet internally —
+both are imported lazily, at tour-start time, inside the component itself.
+Consumers don't need to install, import, or configure either one
+themselves.
 
 The scoped popover styling (the part that actually differs per kit —
 background, radius, button colors) is injected automatically at runtime
 via your kit's own theme tokens (`var(--popover)`, `var(--primary)`,
-etc.) — no separate stylesheet needed for that part, just the base
-`driver.css` import above.
+etc.) — no separate stylesheet to manage for that part either.
 
 `DashboardTour` never generates or imports tour step content — keep your
 own `tour-steps.ts` exactly as it is today, and pass its array as the
-`steps` prop (already resolved for mobile vs. desktop by your own code,
-same as before).
+`steps` prop. `steps` accepts either a plain array, or a lazy resolver
+function (`() => TourStep[]`) for kits that need SSR-safe mobile-vs-desktop
+splitting — the resolver is called only at tour-start time, matching how
+the kits currently resolve `isMobile` via `window.matchMedia`.
 
 ### Private repo auth for CI / deploys
 
@@ -177,9 +169,14 @@ works locally.
   **must** pass `variant="banner"` explicitly when migrating, or it will
   silently render as a small square with the wrong resize target.
 - `DashboardTour` — wires up `driver.js` (config, lifecycle, floating
-  replay button) from an injected `steps` array, `onFirstSeen` callback,
-  and `scopeClassName` — the tour mechanism is shared, tour content and
-  "has this user seen it" persistence stay entirely kit-local.
+  replay button, `driver.js` + its CSS both lazily self-imported) from an
+  injected `steps` array/resolver, `onFirstSeen` callback, `isHomeRoute`,
+  and `navigateHome` — the tour mechanism is shared, tour content, routing,
+  and "has this user seen it" persistence stay entirely kit-local. The
+  replay button renders on every page (not just the tour's home route);
+  replaying from elsewhere navigates home first, then auto-runs once
+  landed. `onFirstSeen` fires once, immediately when an unseen user's tour
+  auto-starts — never on replay, never on completion.
 
 ## Usage
 
