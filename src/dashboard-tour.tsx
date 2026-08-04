@@ -87,7 +87,9 @@ export function DashboardTour({
 
   React.useEffect(() => {
     if (!isHomeRoute) return;
-    void startTour();
+    if (!seenAtMountRef.current) {
+      void startTour();
+    }
     return () => {
       driverRef.current?.destroy();
       driverRef.current = null;

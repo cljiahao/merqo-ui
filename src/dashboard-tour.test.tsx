@@ -77,7 +77,7 @@ describe("DashboardTour — driver.js config", () => {
       "./dashboard-tour"
     );
 
-    render(<FreshDashboardTour {...baseProps({ seen: true })} />);
+    render(<FreshDashboardTour {...baseProps({ seen: false })} />);
     await waitFor(() => expect(driverSpy).toHaveBeenCalledTimes(1));
 
     const config = driverSpy.mock.calls[0][0];
@@ -105,6 +105,38 @@ describe("DashboardTour — driver.js config", () => {
     vi.doUnmock("driver.js");
   });
 
+  it("does not auto-start driver.js for a user who has already seen the tour, but starts it on replay click", async () => {
+    const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
+      drive: vi.fn(),
+      destroy: vi.fn(),
+    }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    render(<FreshDashboardTour {...baseProps({ seen: true })} />);
+    const button = await screen.findByRole("button", { name: /replay tour/i });
+    await waitFor(() => expect(driverSpy).not.toHaveBeenCalled());
+
+    await act(async () => {
+      button.click();
+    });
+    await waitFor(() => expect(driverSpy).toHaveBeenCalledTimes(1));
+
+    const config = driverSpy.mock.calls[0][0];
+    expect(config).toMatchObject({
+      showProgress: true,
+      allowClose: true,
+      overlayOpacity: 0.6,
+      nextBtnText: "Next",
+      prevBtnText: "Back",
+      doneBtnText: "Done",
+    });
+
+    vi.doUnmock("driver.js");
+  });
+
   it("destroys the driver instance on unmount", async () => {
     const destroy = vi.fn();
     vi.doMock("driver.js", () => ({
@@ -115,7 +147,7 @@ describe("DashboardTour — driver.js config", () => {
     );
 
     const { unmount } = render(
-      <FreshDashboardTour {...baseProps({ seen: true })} />,
+      <FreshDashboardTour {...baseProps({ seen: false })} />,
     );
     await waitFor(() => expect(destroy).not.toHaveBeenCalled());
 
