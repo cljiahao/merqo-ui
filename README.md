@@ -110,6 +110,33 @@ behind an eslint-disable. A kit with its own wrapper (e.g. qkit's
 `MediaImage`, which marks `.svg` sources `unoptimized`) passes that wrapper
 as `imageComponent` instead.
 
+### `driver.js` CSS import (only if you use `DashboardTour`)
+
+`DashboardTour` wires up `driver.js` for you, but it cannot bundle
+`driver.js`'s own base stylesheet — this package's build has no CSS
+loader (unlike your kit's own Next.js/webpack build, which already
+handles this). Import it once, wherever your kit already imports global
+CSS (e.g. alongside `globals.css` in your root layout):
+
+```ts
+import "driver.js/dist/driver.css";
+```
+
+Every kit already does this today for its own local tour component — if
+you're migrating an existing `dashboard-tour.tsx` to the shared one,
+keep this import, don't drop it.
+
+The scoped popover styling (the part that actually differs per kit —
+background, radius, button colors) is injected automatically at runtime
+via your kit's own theme tokens (`var(--popover)`, `var(--primary)`,
+etc.) — no separate stylesheet needed for that part, just the base
+`driver.css` import above.
+
+`DashboardTour` never generates or imports tour step content — keep your
+own `tour-steps.ts` exactly as it is today, and pass its array as the
+`steps` prop (already resolved for mobile vs. desktop by your own code,
+same as before).
+
 ### Private repo auth for CI / deploys
 
 This repo is currently **private**. A local `pnpm install` works because it
@@ -149,6 +176,10 @@ works locally.
   or throw. Default `variant` is `"thumb"` — qkit's booth-banner usage
   **must** pass `variant="banner"` explicitly when migrating, or it will
   silently render as a small square with the wrong resize target.
+- `DashboardTour` — wires up `driver.js` (config, lifecycle, floating
+  replay button) from an injected `steps` array, `onFirstSeen` callback,
+  and `scopeClassName` — the tour mechanism is shared, tour content and
+  "has this user seen it" persistence stay entirely kit-local.
 
 ## Usage
 

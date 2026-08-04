@@ -23,3 +23,5 @@ export type {
   ImageResizeResult,
   ImagePreviewProps,
 } from "./image-uploader";
+export { DashboardTour } from "./dashboard-tour";
+export type { DashboardTourProps, TourStep } from "./dashboard-tour";

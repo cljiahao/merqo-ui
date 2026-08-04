@@ -191,3 +191,10 @@ describe("DashboardTour — injected popover CSS", () => {
     expect(css).toContain(".second-tour");
   });
 });
+
+describe("DashboardTour — package entry point", () => {
+  it("is exported from the package root", async () => {
+    const pkg = await import("./index");
+    expect(pkg.DashboardTour).toBe(DashboardTour);
+  });
+});
