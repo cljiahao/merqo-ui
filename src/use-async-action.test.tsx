@@ -94,4 +94,20 @@ describe("useAsyncAction", () => {
 
     expect(result.current.error).toBeFalsy();
   });
+
+  it("N2: reset() clears a stored error outside of a run() call", async () => {
+    const action = vi.fn(() => Promise.reject(new Error("boom")));
+    const { result } = renderHook(() => useAsyncAction(action));
+
+    await act(async () => {
+      await expect(result.current.run()).rejects.toThrow("boom");
+    });
+    expect(result.current.error).toBeTruthy();
+
+    act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.error).toBeFalsy();
+  });
 });

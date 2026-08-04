@@ -112,8 +112,57 @@ describe("ProfileForm", () => {
     await user.type(screen.getByLabelText("Instagram"), "@manfreds");
     await user.click(screen.getByRole("button", { name: /save social links/i }));
 
+    await waitFor(() => expect(props.onSaveStallIdentity).toHaveBeenCalled());
+    expect(props.onSaveDisplayName).not.toHaveBeenCalled();
+  });
+
+  it("N1: saving social links after a stall-name edit-without-save sends the ORIGINAL persisted stall name, not the live unsaved edit", async () => {
+    const user = userEvent.setup();
+    const props = makeProps();
+    render(<ProfileForm {...props} />);
+
+    await user.clear(screen.getByLabelText("Stall name"));
+    await user.type(screen.getByLabelText("Stall name"), "Half-typed Name");
+    await user.type(screen.getByLabelText("Instagram"), "@manfreds");
+    await user.click(screen.getByRole("button", { name: /save social links/i }));
+
     expect(props.onSaveStallIdentity).toHaveBeenCalledWith({
-      stallName: "",
+      stallName: "Manfred's Coffee Cart",
+      socialLinks: { instagram: "@manfreds", website: "" },
+    });
+  });
+
+  it("N1: saving social links after clearing (but not saving) the stall name still sends the original persisted stall name, not an empty string", async () => {
+    const user = userEvent.setup();
+    const props = makeProps();
+    render(<ProfileForm {...props} />);
+
+    await user.clear(screen.getByLabelText("Stall name"));
+    await user.type(screen.getByLabelText("Instagram"), "@manfreds");
+    await user.click(screen.getByRole("button", { name: /save social links/i }));
+
+    expect(props.onSaveStallIdentity).toHaveBeenCalledWith({
+      stallName: "Manfred's Coffee Cart",
+      socialLinks: { instagram: "@manfreds", website: "" },
+    });
+  });
+
+  it("N1: after the stall-name section's own save succeeds, a subsequent social-links save uses the newly-saved name", async () => {
+    const user = userEvent.setup();
+    const props = makeProps();
+    render(<ProfileForm {...props} />);
+
+    await user.clear(screen.getByLabelText("Stall name"));
+    await user.type(screen.getByLabelText("Stall name"), "New Cart Name");
+    await user.click(screen.getByRole("button", { name: /save stall name/i }));
+    await waitFor(() => expect(props.onSaveStallIdentity).toHaveBeenCalledTimes(1));
+
+    await user.type(screen.getByLabelText("Instagram"), "@manfreds");
+    await user.click(screen.getByRole("button", { name: /save social links/i }));
+
+    await waitFor(() => expect(props.onSaveStallIdentity).toHaveBeenCalledTimes(2));
+    expect(props.onSaveStallIdentity).toHaveBeenLastCalledWith({
+      stallName: "New Cart Name",
       socialLinks: { instagram: "@manfreds", website: "" },
     });
   });

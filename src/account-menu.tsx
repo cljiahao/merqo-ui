@@ -82,7 +82,17 @@ export function AccountMenu({
 
   return (
     <>
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu
+        open={menuOpen}
+        onOpenChange={(open) => {
+          setMenuOpen(open);
+          // N2: clear a stale sign-out error when the menu closes (whether
+          // by Escape, outside click, or a successful sign-out) so
+          // reopening the menu doesn't show a failure that's no longer
+          // current.
+          if (!open) signOut.reset();
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <button
             type="button"

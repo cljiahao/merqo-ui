@@ -110,7 +110,7 @@ describe("AccountMenu", () => {
     expect(contact).toHaveAttribute("href", "/help/contact");
   });
 
-  it("renders a 'Save social links'-equivalent Feedback item that opens the FeedbackSheet", async () => {
+  it("clicking Feedback opens the FeedbackSheet", async () => {
     const user = await openMenu();
     await user.click(await screen.findByRole("menuitem", { name: /feedback/i }));
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
@@ -168,6 +168,26 @@ describe("AccountMenu", () => {
     await waitFor(() =>
       expect(screen.queryByRole("menuitem", { name: /profile/i })).not.toBeInTheDocument(),
     );
+  });
+
+  it("N2: closing the menu after a failed sign-out clears the error, so reopening it doesn't show a stale failure", async () => {
+    signOutAction.mockRejectedValue(new Error("network unreachable"));
+    const user = await openMenu();
+
+    const signOut = await screen.findByRole("menuitem", { name: /sign out/i });
+    await user.click(signOut);
+    expect(await screen.findByText("network unreachable")).toBeInTheDocument();
+
+    // close via Escape (menu stays mounted, just closed)
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(screen.queryByRole("menuitem", { name: /profile/i })).not.toBeInTheDocument(),
+    );
+
+    // reopen - the stale error must be gone
+    await user.click(screen.getByRole("button", { name: /account menu/i }));
+    await screen.findByRole("menuitem", { name: /profile/i });
+    expect(screen.queryByText("network unreachable")).not.toBeInTheDocument();
   });
 
   it("falls back to a generic icon (not an empty avatar) when the vendor name is empty", async () => {

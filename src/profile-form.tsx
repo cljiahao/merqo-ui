@@ -96,6 +96,13 @@ export function ProfileForm({
     string | null
   >(null);
 
+  // N1 fix: the social-links save must send the last *persisted* stall
+  // name, not whatever's currently (possibly unsaved, possibly invalid)
+  // typed into the separate stall-name input. `savedStallName` starts at
+  // the initial prop value and only advances when the stall-name section's
+  // own save actually succeeds - it never reflects a live, unsaved edit.
+  const [savedStallName, setSavedStallName] = React.useState(initial.stallName);
+
   // C1/I1 fix: the stall-name section and the social-links section are two
   // independent forms that both happen to call the same
   // `onSaveStallIdentity` prop. They previously shared one useAsyncAction
@@ -106,6 +113,7 @@ export function ProfileForm({
   const stallNameSave = useAsyncAction(
     async (data: { stallName: string; socialLinks: SocialLinks }) => {
       await onSaveStallIdentity(data);
+      setSavedStallName(data.stallName);
     },
   );
   const socialLinksSave = useAsyncAction(
@@ -277,9 +285,11 @@ export function ProfileForm({
             event.preventDefault();
             // No stall-name guard here (C1): this section only owns the
             // social links fields, both optional, so it saves independently
-            // of whether the stall name is currently valid.
+            // of whether the stall name is currently valid. It sends the
+            // last-persisted stall name (N1), not the live/unsaved value
+            // from the separate stall-name input.
             socialLinksSave
-              .run({ stallName, socialLinks })
+              .run({ stallName: savedStallName, socialLinks })
               .catch((err) => onError?.(err));
           }}
         >

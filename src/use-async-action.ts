@@ -27,5 +27,12 @@ export function useAsyncAction<Args extends unknown[]>(
     [action],
   );
 
-  return { pending, error, run };
+  // N2: lets a caller clear a stale error outside of a `run()` call - e.g.
+  // when the UI that surfaced the error (a menu, a sheet) closes, so
+  // reopening it doesn't show a failure that's no longer "current".
+  const reset = React.useCallback(() => {
+    setError(null);
+  }, []);
+
+  return { pending, error, run, reset };
 }
