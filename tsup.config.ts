@@ -5,7 +5,7 @@ export default defineConfig({
   format: ["esm"],
   dts: true,
   clean: true,
-  external: ["react", "react-dom"],
+  external: ["react", "react-dom", "driver.js"],
   // esbuild drops non-"use strict" directives when bundling multiple modules
   // into one file, so the "use client" directives in info-tooltip.tsx,
   // use-async-action.ts, and ui/tooltip.tsx are silently stripped from the
