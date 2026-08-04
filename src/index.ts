@@ -15,3 +15,11 @@ export { DashboardNav } from "./dashboard-nav";
 export type { DashboardNavProps } from "./dashboard-nav";
 export { ProfileForm } from "./profile-form";
 export type { ProfileFormProps, ProfileFormInitial, SocialLinks } from "./profile-form";
+export { ImageUploader } from "./image-uploader";
+export type {
+  ImageUploaderProps,
+  ImageUploaderVariant,
+  ImageUploadPayload,
+  ImageResizeResult,
+  ImagePreviewProps,
+} from "./image-uploader";

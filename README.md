@@ -70,6 +70,46 @@ obvious build failure. Add an `allowBuilds` entry for `@merqo/ui` and
 verify the built `dist/` actually appears in `node_modules/@merqo/ui/` —
 this check is part of the first kit's migration onto this package.
 
+### `next/image` remote patterns (only if you use `ImageUploader`)
+
+`ImageUploader` never imports `next/image` — the package has no `next`
+dependency, so its preview falls back to a plain `<img>`. To get real
+Next.js image optimisation, pass your own renderer:
+
+```tsx
+import Image from "next/image";
+import { ImageUploader } from "@merqo/ui";
+
+<ImageUploader
+  bucket="vendor-images"
+  pathPrefix={vendorId}
+  value={url}
+  onChange={setUrl}
+  onUpload={uploadToStorage}
+  imageComponent={Image}
+/>;
+```
+
+If you do, your kit **must** allowlist the storage host in
+`next.config.ts`, or `next/image` throws at runtime the first time a vendor
+uploads a photo:
+
+```ts
+// next.config.ts
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "<project-ref>.supabase.co", pathname: "/storage/v1/object/public/**" },
+    ],
+  },
+};
+```
+
+This is exactly the gap that made merqo's local copy render a raw `<img>`
+behind an eslint-disable. A kit with its own wrapper (e.g. qkit's
+`MediaImage`, which marks `.svg` sources `unoptimized`) passes that wrapper
+as `imageComponent` instead.
+
 ### Private repo auth for CI / deploys
 
 This repo is currently **private**. A local `pnpm install` works because it
@@ -102,6 +142,11 @@ works locally.
   independently saved. Never calls a backend directly — every mutation is
   an injected prop, so this component isn't coupled to any one kit's data
   layer.
+- `ImageUploader` — square (`thumb`) or wide (`banner`) image upload control
+  with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
+  step, and an injected storage write (`onUpload`) so the package stays
+  backend-agnostic. `uploading` always resets — success, validation failure,
+  or throw.
 
 ## Usage
 

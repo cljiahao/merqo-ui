@@ -441,3 +441,10 @@ describe("ImageUploader — preview and variants", () => {
     expect(source).not.toMatch(/font-\[/);
   });
 });
+
+describe("ImageUploader — package entry point", () => {
+  it("is exported from the package root", async () => {
+    const pkg = await import("./index");
+    expect(pkg.ImageUploader).toBe(ImageUploader);
+  });
+});
