@@ -50,9 +50,12 @@ export function FeedbackSheet({
   const [npsValidationError, setNpsValidationError] = React.useState(false);
 
   const { pending, error, run } = useAsyncAction(async () => {
-    if (!message.trim()) return;
-    if (showNps && score === null) {
-      setNpsValidationError(true);
+    if (showNps) {
+      if (score === null) {
+        setNpsValidationError(true);
+        return;
+      }
+    } else if (!message.trim()) {
       return;
     }
     const payload: FeedbackData = { message, source, metric };

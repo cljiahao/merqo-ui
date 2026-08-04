@@ -120,6 +120,32 @@ describe("FeedbackSheet", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it("showNps: submits successfully with an empty message when a score is picked", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const onOpenChange = vi.fn();
+    render(
+      <FeedbackSheet
+        open
+        onOpenChange={onOpenChange}
+        onSubmit={onSubmit}
+        showNps
+        source="vendor"
+      />,
+    );
+
+    await user.click(screen.getByRole("radio", { name: "9" }));
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      message: "",
+      source: "vendor",
+      metric: undefined,
+      nps: 9,
+    });
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
   it("showNps: includes the picked score in the onSubmit payload", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValue(undefined);

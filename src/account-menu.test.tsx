@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AccountMenu } from "./account-menu";
 
@@ -209,5 +209,47 @@ describe("AccountMenu", () => {
     await openMenu({ extraLink: { href: "/admin", label: "Go to admin" } });
     const link = await screen.findByRole("menuitem", { name: /go to admin/i });
     expect(link).toHaveAttribute("href", "/admin");
+  });
+
+  it("forwards showNps to the internal FeedbackSheet, rendering the NPS score grid", async () => {
+    const user = await openMenu({ showNps: true });
+    await user.click(await screen.findByRole("menuitem", { name: /feedback/i }));
+
+    expect(
+      await screen.findByRole("radiogroup", { name: /recommend score, 0 to 10/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("does not render the NPS score grid in the internal FeedbackSheet when showNps is not set", async () => {
+    const user = await openMenu();
+    await user.click(await screen.findByRole("menuitem", { name: /feedback/i }));
+    await screen.findByLabelText(/message/i);
+
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+  });
+
+  it("forwards getHelp.categories to the internal HelpSheet, rendering the category grid", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    const user = await openMenu({
+      getHelp: {
+        type: "form",
+        onSubmit,
+        categories: [
+          { value: "vendor_access", label: "Vendor access" },
+          { value: "billing", label: "Billing" },
+        ],
+      },
+    });
+    const helpItem = await screen.findByRole("menuitem", { name: /get help/i });
+    await user.click(helpItem);
+
+    const group = await screen.findByRole("radiogroup", { name: /what's it about/i });
+    expect(within(group).getAllByRole("radio")).toHaveLength(2);
+
+    await user.click(screen.getByRole("radio", { name: "Billing" }));
+    await user.type(await screen.findByLabelText(/message/i), "I'm stuck");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith({ message: "I'm stuck", category: "billing" });
   });
 });

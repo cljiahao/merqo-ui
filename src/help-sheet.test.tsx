@@ -63,6 +63,13 @@ describe("HelpSheet", () => {
     expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
   });
 
+  it("form mode: does not render a category grid when categories is an empty array", () => {
+    render(
+      <HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={vi.fn()} categories={[]} />,
+    );
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+  });
+
   it("form mode: renders a category radiogroup with the first category pre-selected", () => {
     render(
       <HelpSheet

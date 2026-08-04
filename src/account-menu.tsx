@@ -21,7 +21,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 export type AccountMenuGetHelp =
   | { type: "mailto"; address: string }
   | { type: "drawer"; content: React.ReactNode }
-  | { type: "form"; onSubmit: (data: SupportRequest) => Promise<void> }
+  | {
+      type: "form";
+      onSubmit: (data: SupportRequest) => Promise<void>;
+      categories?: { value: string; label: string }[];
+    }
   | { type: "submenu"; items: { label: string; href: string }[] };
 
 export interface AccountMenuProps {
@@ -35,6 +39,8 @@ export interface AccountMenuProps {
   feedbackSource?: string;
   /** Analytics tag forwarded to the internal FeedbackSheet's `metric`. */
   feedbackMetric?: string;
+  /** Forwarded to the internal FeedbackSheet's `showNps`. */
+  showNps?: boolean;
   /** Optional hook for a consuming kit's own toast/notification on async failure (e.g. a failed sign-out). */
   onError?: (error: unknown) => void;
   extraLink?: { href: string; label: string };
@@ -67,6 +73,7 @@ export function AccountMenu({
   onFeedbackSubmit,
   feedbackSource,
   feedbackMetric,
+  showNps,
   onError,
   extraLink,
 }: AccountMenuProps) {
@@ -184,6 +191,7 @@ export function AccountMenu({
         onSubmit={onFeedbackSubmit}
         source={feedbackSource}
         metric={feedbackMetric}
+        showNps={showNps}
         onError={onError}
       />
 
@@ -193,6 +201,7 @@ export function AccountMenu({
           onOpenChange={setHelpOpen}
           mode="form"
           onSubmit={getHelp.onSubmit}
+          categories={getHelp.categories}
           onError={onError}
         />
       ) : getHelp.type === "drawer" ? (

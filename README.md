@@ -150,10 +150,19 @@ works locally.
   layer on top via `className`, not baked into the component.
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
   `HelpSheet` supports a plain `mailto:` mode for kits with no
-  ticket-queue infra yet, or a real form mode.
+  ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
+  optional `showNps?: boolean` to add a 0-10 recommend-score grid above the
+  message field (score becomes required, message becomes optional).
+  `HelpSheet`'s form mode takes an optional
+  `categories?: {value, label}[]` to add a category radiogroup above the
+  message field (an empty array behaves like no categories at all).
 - `AccountMenu` — the avatar dropdown alone (Profile, optional kit-local
   settings, optional Plan, Get help, Feedback, Sign out — always last,
   separated, destructive-styled). Reusable without the full nav shell.
+  Takes an optional `extraLink?: {href, label}` for a kit-specific menu
+  item, and forwards `showNps` to its internal `FeedbackSheet` and
+  `getHelp.categories` (when `getHelp.type === "form"`) to its internal
+  `HelpSheet`.
 - `DashboardNav` — the full sticky-topbar shell (burger-left/avatar-right
   at every viewport). Composes `AccountMenu`.
 - `ProfileForm` — the full profile/settings page composition (stall/shop
