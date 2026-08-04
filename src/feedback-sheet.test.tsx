@@ -65,4 +65,26 @@ describe("FeedbackSheet", () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it("C3: shows an inline error and calls onError when onSubmit rejects, and does not close the sheet", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    const onError = vi.fn();
+    const onSubmit = vi.fn().mockRejectedValue(new Error("submit failed"));
+    render(
+      <FeedbackSheet
+        open
+        onOpenChange={onOpenChange}
+        onSubmit={onSubmit}
+        onError={onError}
+      />,
+    );
+
+    await user.type(screen.getByLabelText(/message/i), "hi");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(await screen.findByText("submit failed")).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    expect(onError).toHaveBeenCalledWith(expect.any(Error));
+  });
 });

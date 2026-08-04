@@ -36,4 +36,25 @@ describe("HelpSheet", () => {
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  it("C3: form mode shows an inline error and calls onError when onSubmit rejects", async () => {
+    const user = userEvent.setup();
+    const onError = vi.fn();
+    const onSubmit = vi.fn().mockRejectedValue(new Error("could not send"));
+    render(
+      <HelpSheet
+        open
+        onOpenChange={() => {}}
+        mode="form"
+        onSubmit={onSubmit}
+        onError={onError}
+      />,
+    );
+
+    await user.type(screen.getByLabelText(/message/i), "help!");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(await screen.findByText("could not send")).toBeInTheDocument();
+    expect(onError).toHaveBeenCalledWith(expect.any(Error));
+  });
 });

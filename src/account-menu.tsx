@@ -1,8 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { User as UserIcon } from "lucide-react";
 
 import { FeedbackSheet, type FeedbackData } from "./feedback-sheet";
+import { HelpSheet, type SupportRequest } from "./help-sheet";
+import { useAsyncAction } from "./use-async-action";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +21,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 export type AccountMenuGetHelp =
   | { type: "mailto"; address: string }
   | { type: "drawer"; content: React.ReactNode }
+  | { type: "form"; onSubmit: (data: SupportRequest) => Promise<void> }
   | { type: "submenu"; items: { label: string; href: string }[] };
 
 export interface AccountMenuProps {
@@ -27,16 +31,28 @@ export interface AccountMenuProps {
   showPlanItem?: boolean;
   getHelp: AccountMenuGetHelp;
   onFeedbackSubmit: (data: FeedbackData) => Promise<void>;
+  /** Analytics tag forwarded to the internal FeedbackSheet's `source`. */
+  feedbackSource?: string;
+  /** Analytics tag forwarded to the internal FeedbackSheet's `metric`. */
+  feedbackMetric?: string;
+  /** Optional hook for a consuming kit's own toast/notification on async failure (e.g. a failed sign-out). */
+  onError?: (error: unknown) => void;
+}
+
+function toErrorMessage(error: unknown): string {
+  return error instanceof Error
+    ? error.message
+    : "Something went wrong. Please try again.";
 }
 
 function AvatarInitial({ name, avatarUrl }: { name: string; avatarUrl?: string }) {
   if (avatarUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
     return <img src={avatarUrl} alt="" className="size-8 rounded-full object-cover" />;
   }
+  const initial = name.trim().charAt(0).toUpperCase();
   return (
     <span className="bg-muted text-muted-foreground flex size-8 items-center justify-center rounded-full text-sm font-medium">
-      {name.charAt(0).toUpperCase()}
+      {initial || <UserIcon className="size-4" />}
     </span>
   );
 }
@@ -48,13 +64,25 @@ export function AccountMenu({
   showPlanItem = true,
   getHelp,
   onFeedbackSubmit,
+  feedbackSource,
+  feedbackMetric,
+  onError,
 }: AccountMenuProps) {
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const [feedbackOpen, setFeedbackOpen] = React.useState(false);
   const [helpOpen, setHelpOpen] = React.useState(false);
 
+  // C2 fix: sign-out used to be `void signOutAction()` - a rejection was
+  // discarded, the menu closed regardless, and the user had no way to know
+  // sign-out failed. Now it's wrapped in useAsyncAction (error state) and
+  // the dropdown item prevents Radix's default auto-close so the menu only
+  // closes on a *successful* sign-out; on failure it stays open with a
+  // visible inline error next to the item.
+  const signOut = useAsyncAction(signOutAction);
+
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <button
             type="button"
@@ -87,7 +115,7 @@ export function AccountMenu({
             <DropdownMenuItem asChild>
               <a href={`mailto:${getHelp.address}`}>Get help</a>
             </DropdownMenuItem>
-          ) : getHelp.type === "drawer" ? (
+          ) : getHelp.type === "drawer" || getHelp.type === "form" ? (
             <DropdownMenuItem onSelect={() => setHelpOpen(true)}>
               Get help
             </DropdownMenuItem>
@@ -112,12 +140,23 @@ export function AccountMenu({
 
           <DropdownMenuItem
             variant="destructive"
-            onSelect={() => {
-              void signOutAction();
+            disabled={signOut.pending}
+            onSelect={(event) => {
+              // Keep the menu open ourselves; close it only on success.
+              event.preventDefault();
+              signOut
+                .run()
+                .then(() => setMenuOpen(false))
+                .catch((err) => onError?.(err));
             }}
           >
-            Sign out
+            {signOut.pending ? "Signing out…" : "Sign out"}
           </DropdownMenuItem>
+          {signOut.error ? (
+            <p className="text-destructive px-2 py-1 text-xs" role="alert">
+              {toErrorMessage(signOut.error)}
+            </p>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -125,9 +164,20 @@ export function AccountMenu({
         open={feedbackOpen}
         onOpenChange={setFeedbackOpen}
         onSubmit={onFeedbackSubmit}
+        source={feedbackSource}
+        metric={feedbackMetric}
+        onError={onError}
       />
 
-      {getHelp.type === "drawer" ? (
+      {getHelp.type === "form" ? (
+        <HelpSheet
+          open={helpOpen}
+          onOpenChange={setHelpOpen}
+          mode="form"
+          onSubmit={getHelp.onSubmit}
+          onError={onError}
+        />
+      ) : getHelp.type === "drawer" ? (
         <Sheet open={helpOpen} onOpenChange={setHelpOpen}>
           <SheetContent>
             <SheetHeader>
