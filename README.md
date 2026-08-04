@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.5.0"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.6.0"
 }
 ```
 
@@ -162,7 +162,9 @@ works locally.
   Takes an optional `extraLink?: {href, label}` for a kit-specific menu
   item, and forwards `showNps` to its internal `FeedbackSheet` and
   `getHelp.categories` (when `getHelp.type === "form"`) to its internal
-  `HelpSheet`.
+  `HelpSheet`. `vendor.subtitle?: string` (e.g. the signed-in email) shows
+  next to the trigger avatar and as a header line above Profile — omit it
+  for no identity text anywhere, matching pre-`subtitle` behavior.
 - `DashboardNav` — the full sticky-topbar shell (burger-left/avatar-right
   at every viewport). Composes `AccountMenu`.
 - `ProfileForm` — the full profile/settings page composition (stall/shop
