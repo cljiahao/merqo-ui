@@ -10,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -29,7 +30,7 @@ export type AccountMenuGetHelp =
   | { type: "submenu"; items: { label: string; href: string }[] };
 
 export interface AccountMenuProps {
-  vendor: { name: string; avatarUrl?: string; tier?: string };
+  vendor: { name: string; avatarUrl?: string; tier?: string; subtitle?: string };
   signOutAction: () => Promise<void>;
   kitLocalSettingsHref?: string;
   showPlanItem?: boolean;
@@ -109,9 +110,22 @@ export function AccountMenu({
             className="focus-visible:ring-ring/50 inline-flex items-center gap-2 rounded-full outline-none focus-visible:ring-2"
           >
             <AvatarInitial name={vendor.name} avatarUrl={vendor.avatarUrl} />
+            {vendor.subtitle && (
+              <span className="hidden max-w-[12rem] truncate text-sm font-medium sm:inline">
+                {vendor.subtitle}
+              </span>
+            )}
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {vendor.subtitle && (
+            <>
+              <DropdownMenuLabel className="text-muted-foreground truncate text-xs font-normal">
+                {vendor.subtitle}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+            </>
+          )}
           <DropdownMenuItem asChild>
             <a href="/dashboard/profile">Profile</a>
           </DropdownMenuItem>

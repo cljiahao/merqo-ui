@@ -252,4 +252,48 @@ describe("AccountMenu", () => {
 
     expect(onSubmit).toHaveBeenCalledWith({ message: "I'm stuck", category: "billing" });
   });
+
+  it("does not render subtitle text in the trigger or dropdown label when vendor.subtitle is not set", async () => {
+    render(<AccountMenu {...baseProps} />);
+    const trigger = screen.getByRole("button", { name: /account menu/i });
+    // Subtitle should not be in the trigger
+    expect(trigger).not.toHaveTextContent("manfred@example.com");
+  });
+
+  it("renders vendor.subtitle in the trigger button when provided", async () => {
+    render(<AccountMenu {...baseProps} vendor={{ name: "Manfred", subtitle: "manfred@example.com" }} />);
+    const trigger = screen.getByRole("button", { name: /account menu/i });
+    expect(trigger).toHaveTextContent("manfred@example.com");
+  });
+
+  it("renders vendor.subtitle as a DropdownMenuLabel at the top of the dropdown when provided", async () => {
+    await openMenu({ vendor: { name: "Manfred", subtitle: "manfred@example.com" } });
+    // Find the label by its data-slot attribute
+    const label = screen.getByText("manfred@example.com", { selector: "[data-slot='dropdown-menu-label']" });
+    expect(label).toBeInTheDocument();
+    expect(label).toHaveClass("text-muted-foreground", "text-xs", "font-normal");
+  });
+
+  it("places the subtitle label before the Profile item with a separator", async () => {
+    await openMenu({ vendor: { name: "Manfred", subtitle: "manfred@example.com" } });
+    // Find the label by its data-slot attribute
+    const label = screen.getByText("manfred@example.com", { selector: "[data-slot='dropdown-menu-label']" });
+    expect(label).toBeInTheDocument();
+
+    const separator = label.nextElementSibling;
+    expect(separator).toHaveAttribute("data-slot", "dropdown-menu-separator");
+  });
+
+  it("does not render a label or separator in the dropdown when vendor.subtitle is not set", async () => {
+    await openMenu();
+    // Profile should be the first item (no label/separator before it)
+    const profileItem = await screen.findByRole("menuitem", { name: /profile/i });
+    const previousElement = profileItem.previousElementSibling;
+    // Should not be a label (previousElement should be null or not a label)
+    if (previousElement) {
+      expect(previousElement).not.toHaveAttribute("data-slot", "dropdown-menu-label");
+    } else {
+      expect(previousElement).toBeNull();
+    }
+  });
 });
