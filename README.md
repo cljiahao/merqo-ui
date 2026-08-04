@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.6.0"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.7.0"
 }
 ```
 
@@ -141,13 +141,22 @@ works locally.
 
 ## Components
 
-- `InfoTooltip` — icon + tooltip with a parameterized `aria-label`.
+- `InfoTooltip` — icon + tooltip with a parameterized `aria-label` (defaults
+  to `"More info"`). `trigger?: "hover" | "tap"` (default `"hover"`) switches
+  to a click-triggered `Popover`, for touch-first flows where hover never
+  fires.
 - `useAsyncAction` — pending-state hook that always resets, even on throw.
+  Ships a companion `navigatingAway(): Promise<never>` — `await` it at the
+  end of a success-and-navigate branch to keep `pending` true through the
+  route transition instead of the button re-enabling mid-navigation.
 - `TwoColumnSections` — the profile/settings two-column flex-stack layout
   (never a CSS grid — see the component's test file for why).
-- `Section` — visually-neutral field-group shell (icon, eyebrow, title,
-  optional description/tooltip). Kit-specific skins (e.g. a paper texture)
-  layer on top via `className`, not baked into the component.
+- `Section` — visually-neutral field-group shell. `icon: ReactNode` (an
+  already-rendered element, e.g. `<Store className="size-5" />`, not a
+  component reference), optional `eyebrow?: string`, title, optional
+  `description?: string`, optional `tooltip?: ReactNode` (rich content, not
+  just a string). Kit-specific skins (e.g. a paper texture) layer on top via
+  `className`, not baked into the component.
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
   `HelpSheet` supports a plain `mailto:` mode for kits with no
   ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
@@ -155,7 +164,9 @@ works locally.
   message field (score becomes required, message becomes optional).
   `HelpSheet`'s form mode takes an optional
   `categories?: {value, label}[]` to add a category radiogroup above the
-  message field (an empty array behaves like no categories at all).
+  message field (an empty array behaves like no categories at all). Both
+  take optional `title?`/`description?` overrides (each kit's own copy) —
+  omit either for this package's own defaults.
 - `AccountMenu` — the avatar dropdown alone (Profile, optional kit-local
   settings, optional Plan, Get help, Feedback, Sign out — always last,
   separated, destructive-styled). Reusable without the full nav shell.
@@ -164,14 +175,26 @@ works locally.
   `getHelp.categories` (when `getHelp.type === "form"`) to its internal
   `HelpSheet`. `vendor.subtitle?: string` (e.g. the signed-in email) shows
   next to the trigger avatar and as a header line above Profile — omit it
-  for no identity text anywhere, matching pre-`subtitle` behavior.
+  for no identity text anywhere, matching pre-`subtitle` behavior. Optional
+  `tierBadge?: ReactNode` renders next to the vendor name in the dropdown
+  header (only when `vendor.subtitle` is also set). The trigger always
+  carries `data-tour="nav-account"` for `DashboardTour` step targeting.
 - `DashboardNav` — the full sticky-topbar shell (burger-left/avatar-right
-  at every viewport). Composes `AccountMenu`.
+  at every viewport). Composes `AccountMenu`. The burger always carries
+  `data-tour="nav-menu"`. Optional `tourAnchor?: (href) => string` stamps
+  `data-tour` on each nav link; optional `isActiveHref?: (href) => boolean`
+  applies active styling and `aria-current="page"` — both injected, since
+  this package has no router dependency of its own.
 - `ProfileForm` — the full profile/settings page composition (stall/shop
   name → photo → password | display name → social links), each section
   independently saved. Never calls a backend directly — every mutation is
   an injected prop, so this component isn't coupled to any one kit's data
-  layer.
+  layer. The avatar section composes `ImageUploader` internally (preview,
+  remove, client-side resize, validation) — pass through `avatarBucket`,
+  `avatarPathPrefix`, `onAvatarUpload`, and the optional `avatar*` passthroughs
+  matching `ImageUploader`'s own props; `onSaveAvatar` now receives the
+  uploaded `string | null` URL, not a raw `File`. `SocialLinks` now has all
+  4 fields every kit uses: `website`, `instagram`, `facebook`, `tiktok`.
 - `ImageUploader` — square (`thumb`) or wide (`banner`) image upload control
   with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
   step, and an injected storage write (`onUpload`) so the package stays
@@ -187,7 +210,11 @@ works locally.
   replay button renders on every page (not just the tour's home route);
   replaying from elsewhere navigates home first, then auto-runs once
   landed. `onFirstSeen` fires once, immediately when an unseen user's tour
-  auto-starts — never on replay, never on completion.
+  auto-starts — never on replay, never on completion. Ships the full
+  cross-kit popover CSS ruleset by default (title, description,
+  progress-text, close/prev/next buttons, 4-directional arrow tinting) — a
+  migrated kit can delete its own `tour.css` entirely. Popover base class is
+  the generic `"tour-popover"`, not kit-specific.
 
 ## Usage
 
