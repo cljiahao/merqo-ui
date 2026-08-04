@@ -6,17 +6,17 @@ import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
 
 export interface SectionProps {
-  icon: React.ComponentType<{ className?: string }>;
-  eyebrow: string;
+  icon: React.ReactNode;
+  eyebrow?: string;
   title: string;
   description?: string;
-  tooltip?: string;
+  tooltip?: React.ReactNode;
   className?: string;
   children: React.ReactNode;
 }
 
 export function Section({
-  icon: Icon,
+  icon,
   eyebrow,
   title,
   description,
@@ -34,12 +34,14 @@ export function Section({
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <span className="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-full">
-            <Icon className="size-4" />
+            {icon}
           </span>
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              {eyebrow}
-            </span>
+            {eyebrow ? (
+              <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                {eyebrow}
+              </span>
+            ) : null}
             <div className="flex items-center gap-1.5">
               <h3 className="text-base font-semibold">{title}</h3>
               {tooltip ? (

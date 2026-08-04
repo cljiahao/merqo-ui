@@ -1,12 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Info } from "lucide-react";
 import { Section } from "./section";
 
 describe("Section", () => {
   it("renders eyebrow, title, and children", () => {
     render(
-      <Section icon={Info} eyebrow="Just for you" title="Display name">
+      <Section icon={<Info />} eyebrow="Just for you" title="Display name">
         <div>field content</div>
       </Section>,
     );
@@ -17,23 +18,43 @@ describe("Section", () => {
 
   it("renders the icon", () => {
     const { container } = render(
-      <Section icon={Info} eyebrow="e" title="t">
+      <Section icon={<Info />} eyebrow="e" title="t">
         <div />
       </Section>,
     );
     expect(container.querySelector("svg")).toBeInTheDocument();
   });
 
+  it("renders icon as a passed-in element, not a component reference", () => {
+    render(
+      <Section icon={<span data-testid="my-icon" />} title="Stall name">
+        <p>content</p>
+      </Section>,
+    );
+    expect(screen.getByTestId("my-icon")).toBeInTheDocument();
+  });
+
+  it("renders without an eyebrow when none is given", () => {
+    render(
+      <Section icon={<span />} title="Stall name">
+        <p>content</p>
+      </Section>,
+    );
+    expect(screen.queryByText(/eyebrow/i)).not.toBeInTheDocument();
+    // No eyebrow-styled element rendered at all - the header still shows only the title.
+    expect(screen.getByText("Stall name")).toBeInTheDocument();
+  });
+
   it("renders a description when provided, omits it when not", () => {
     const { rerender } = render(
-      <Section icon={Info} eyebrow="e" title="t" description="extra info">
+      <Section icon={<Info />} eyebrow="e" title="t" description="extra info">
         <div />
       </Section>,
     );
     expect(screen.getByText("extra info")).toBeInTheDocument();
 
     rerender(
-      <Section icon={Info} eyebrow="e" title="t">
+      <Section icon={<Info />} eyebrow="e" title="t">
         <div />
       </Section>,
     );
@@ -42,7 +63,7 @@ describe("Section", () => {
 
   it("renders an InfoTooltip trigger when a tooltip is provided, omits it when not", () => {
     const { rerender } = render(
-      <Section icon={Info} eyebrow="e" title="Display name" tooltip="more detail">
+      <Section icon={<Info />} eyebrow="e" title="Display name" tooltip="more detail">
         <div />
       </Section>,
     );
@@ -51,7 +72,7 @@ describe("Section", () => {
     ).toBeInTheDocument();
 
     rerender(
-      <Section icon={Info} eyebrow="e" title="Display name">
+      <Section icon={<Info />} eyebrow="e" title="Display name">
         <div />
       </Section>,
     );
@@ -60,9 +81,28 @@ describe("Section", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders a ReactNode tooltip's content when the tooltip is opened", async () => {
+    const user = userEvent.setup();
+    render(
+      <Section
+        icon={<span />}
+        title="Stall name"
+        tooltip={
+          <span>
+            Rich <strong data-testid="tooltip-rich-content">content</strong>
+          </span>
+        }
+      >
+        <p>content</p>
+      </Section>,
+    );
+    await user.hover(screen.getByRole("button", { name: /more about stall name/i }));
+    expect(await screen.findByTestId("tooltip-rich-content")).toBeInTheDocument();
+  });
+
   it("merges a custom className onto the root element", () => {
     const { container } = render(
-      <Section icon={Info} eyebrow="e" title="t" className="custom-class">
+      <Section icon={<Info />} eyebrow="e" title="t" className="custom-class">
         <div />
       </Section>,
     );
@@ -73,7 +113,7 @@ describe("Section", () => {
 
   it("never uses a literal color, font, or radius value", () => {
     const { container } = render(
-      <Section icon={Info} eyebrow="e" title="t">
+      <Section icon={<Info />} eyebrow="e" title="t">
         <div />
       </Section>,
     );
