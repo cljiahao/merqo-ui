@@ -16,6 +16,7 @@ export interface FeedbackData {
   message: string;
   source: string;
   metric?: string;
+  nps?: number;
 }
 
 export interface FeedbackSheetProps {
@@ -24,6 +25,7 @@ export interface FeedbackSheetProps {
   onSubmit: (data: FeedbackData) => Promise<void>;
   source?: string;
   metric?: string;
+  showNps?: boolean;
   /** Optional hook for a consuming kit's own toast/notification on async failure. */
   onError?: (error: unknown) => void;
 }
@@ -40,13 +42,27 @@ export function FeedbackSheet({
   onSubmit,
   source = "vendor",
   metric,
+  showNps,
   onError,
 }: FeedbackSheetProps) {
   const [message, setMessage] = React.useState("");
+  const [score, setScore] = React.useState<number | null>(null);
+  const [npsValidationError, setNpsValidationError] = React.useState(false);
+
   const { pending, error, run } = useAsyncAction(async () => {
     if (!message.trim()) return;
-    await onSubmit({ message, source, metric });
+    if (showNps && score === null) {
+      setNpsValidationError(true);
+      return;
+    }
+    const payload: FeedbackData = { message, source, metric };
+    if (showNps && score !== null) {
+      payload.nps = score;
+    }
+    await onSubmit(payload);
     setMessage("");
+    setScore(null);
+    setNpsValidationError(false);
     onOpenChange(false);
   });
 
@@ -66,6 +82,41 @@ export function FeedbackSheet({
             run().catch((err) => onError?.(err));
           }}
         >
+          {showNps && (
+            <div className="flex flex-col gap-2">
+              <div
+                role="radiogroup"
+                aria-label="Recommend score, 0 to 10"
+                className="grid grid-cols-11 gap-1"
+              >
+                {Array.from({ length: 11 }, (_, i) => i).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    role="radio"
+                    aria-checked={score === n}
+                    aria-label={String(n)}
+                    onClick={() => {
+                      setScore(n);
+                      setNpsValidationError(false);
+                    }}
+                    className={`flex items-center justify-center rounded-md border px-2 py-2 text-sm font-medium tabular-nums transition-colors ${
+                      score === n
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              {npsValidationError && (
+                <p className="text-destructive text-sm" role="alert">
+                  Pick a score first
+                </p>
+              )}
+            </div>
+          )}
           <div className="flex flex-1 flex-col gap-2">
             <label htmlFor="feedback-message" className="text-sm font-medium">
               Message

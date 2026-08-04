@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FeedbackSheet } from "./feedback-sheet";
 
@@ -86,5 +86,62 @@ describe("FeedbackSheet", () => {
     expect(await screen.findByText("submit failed")).toBeInTheDocument();
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
     expect(onError).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it("does not render the NPS score grid when showNps is not set", () => {
+    render(<FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} />);
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+  });
+
+  it("showNps: renders an 11-button 0-10 score radiogroup", () => {
+    render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} showNps />,
+    );
+    const group = screen.getByRole("radiogroup", {
+      name: /recommend score, 0 to 10/i,
+    });
+    const buttons = within(group).getAllByRole("radio");
+    expect(buttons).toHaveLength(11);
+    expect(screen.getByRole("radio", { name: "0" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "10" })).toBeInTheDocument();
+  });
+
+  it("showNps: blocks submit and shows inline validation when no score is picked", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={onSubmit} showNps />,
+    );
+
+    await user.type(screen.getByLabelText(/message/i), "Great app!");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(await screen.findByText("Pick a score first")).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("showNps: includes the picked score in the onSubmit payload", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(
+      <FeedbackSheet
+        open
+        onOpenChange={() => {}}
+        onSubmit={onSubmit}
+        showNps
+        source="vendor"
+      />,
+    );
+
+    await user.click(screen.getByRole("radio", { name: "9" }));
+    await user.type(screen.getByLabelText(/message/i), "Great app!");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      message: "Great app!",
+      source: "vendor",
+      metric: undefined,
+      nps: 9,
+    });
   });
 });
