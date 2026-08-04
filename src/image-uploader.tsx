@@ -180,6 +180,10 @@ export function ImageUploader({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
+        // Stable accessible name: the visible label flips to "…"/"Optimizing…"
+        // while an upload is in flight, which would otherwise leave the button
+        // with a meaningless accessible name exactly when it's busy.
+        aria-label={variant === "banner" ? "Add a booth banner" : "Add photo"}
         className={cn(
           "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed transition-colors disabled:opacity-60",
           box,
