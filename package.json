@@ -21,7 +21,9 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "prepare": "npm run build",
@@ -40,7 +42,8 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "~6.9.1",

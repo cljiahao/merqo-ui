@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ProfileForm } from "./profile-form";
 
@@ -91,7 +91,7 @@ describe("ProfileForm", () => {
     expect(props.onSaveDisplayName).not.toHaveBeenCalled();
   });
 
-  it("does not call onSaveStallIdentity when the stall name is emptied out", async () => {
+  it("shows an inline validation error and does not call onSaveStallIdentity when the stall name is emptied out (I2)", async () => {
     const user = userEvent.setup();
     const props = makeProps();
     render(<ProfileForm {...props} />);
@@ -100,6 +100,195 @@ describe("ProfileForm", () => {
     await user.click(screen.getByRole("button", { name: /save stall name/i }));
 
     expect(props.onSaveStallIdentity).not.toHaveBeenCalled();
+    expect(screen.getByText(/enter a name customers will see/i)).toBeInTheDocument();
+  });
+
+  it("C1: saving social links succeeds even when the stall name is blank", async () => {
+    const user = userEvent.setup();
+    const props = makeProps();
+    render(<ProfileForm {...props} />);
+
+    await user.clear(screen.getByLabelText("Stall name"));
+    await user.type(screen.getByLabelText("Instagram"), "@manfreds");
+    await user.click(screen.getByRole("button", { name: /save social links/i }));
+
+    expect(props.onSaveStallIdentity).toHaveBeenCalledWith({
+      stallName: "",
+      socialLinks: { instagram: "@manfreds", website: "" },
+    });
+  });
+
+  it("C1: saving social links does not call onSaveDisplayName or onSavePassword", async () => {
+    const user = userEvent.setup();
+    const props = makeProps();
+    render(<ProfileForm {...props} />);
+
+    await user.type(screen.getByLabelText("Instagram"), "@manfreds");
+    await user.click(screen.getByRole("button", { name: /save social links/i }));
+
+    await waitFor(() => expect(props.onSaveStallIdentity).toHaveBeenCalled());
+    expect(props.onSaveDisplayName).not.toHaveBeenCalled();
+    expect(props.onSavePassword).not.toHaveBeenCalled();
+  });
+
+  it("I1: the social-links save button is not disabled while the stall-name save is pending", async () => {
+    const user = userEvent.setup();
+    let resolveStallName!: () => void;
+    const props = makeProps({
+      onSaveStallIdentity: vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveStallName = resolve;
+          }),
+      ),
+    });
+    render(<ProfileForm {...props} />);
+
+    await user.click(screen.getByRole("button", { name: /save stall name/i }));
+
+    expect(screen.getByRole("button", { name: /save stall name/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /save social links/i })).not.toBeDisabled();
+
+    resolveStallName();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /save stall name/i })).not.toBeDisabled(),
+    );
+  });
+
+  it("I1: the stall-name save button is not disabled while the social-links save is pending", async () => {
+    const user = userEvent.setup();
+    let resolveSocialLinks!: () => void;
+    const props = makeProps({
+      onSaveStallIdentity: vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSocialLinks = resolve;
+          }),
+      ),
+    });
+    render(<ProfileForm {...props} />);
+
+    await user.click(screen.getByRole("button", { name: /save social links/i }));
+
+    expect(screen.getByRole("button", { name: /save social links/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /save stall name/i })).not.toBeDisabled();
+
+    resolveSocialLinks();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /save social links/i })).not.toBeDisabled(),
+    );
+  });
+
+  it("I2: rejects a password shorter than 8 characters without calling onSavePassword", async () => {
+    const user = userEvent.setup();
+    const props = makeProps();
+    render(<ProfileForm {...props} />);
+
+    await user.type(screen.getByLabelText("New password"), "short");
+    await user.click(screen.getByRole("button", { name: /save password/i }));
+
+    expect(props.onSavePassword).not.toHaveBeenCalled();
+    expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument();
+  });
+
+  it("I2: rejects a blank display name without calling onSaveDisplayName", async () => {
+    const user = userEvent.setup();
+    const props = makeProps();
+    render(<ProfileForm {...props} />);
+
+    await user.clear(screen.getByLabelText("Display name"));
+    await user.click(screen.getByRole("button", { name: /save display name/i }));
+
+    expect(props.onSaveDisplayName).not.toHaveBeenCalled();
+    expect(screen.getByText(/enter a display name/i)).toBeInTheDocument();
+  });
+
+  it("I6: renders the given avatarUrl as a preview image in the Profile picture section", () => {
+    render(
+      <ProfileForm
+        {...makeProps({
+          initial: {
+            stallName: "Manfred's Coffee Cart",
+            socialLinks: { instagram: "", website: "" },
+            displayName: "Manfred",
+            avatarUrl: "https://example.com/avatar.png",
+          },
+        })}
+      />,
+    );
+    const avatar = screen.getByRole("img", { name: /current profile photo/i });
+    expect(avatar).toHaveAttribute("src", "https://example.com/avatar.png");
+  });
+
+  it("I6: renders a placeholder (no broken img) when avatarUrl is undefined", () => {
+    render(<ProfileForm {...makeProps()} />);
+    expect(screen.queryByRole("img", { name: /current profile photo/i })).not.toBeInTheDocument();
+  });
+
+  it("C3: surfaces an inline error and calls onError when the stall name save rejects", async () => {
+    const user = userEvent.setup();
+    const onError = vi.fn();
+    const props = makeProps({
+      onSaveStallIdentity: vi.fn().mockRejectedValue(new Error("network down")),
+      onError,
+    });
+    render(<ProfileForm {...props} />);
+
+    await user.click(screen.getByRole("button", { name: /save stall name/i }));
+
+    expect(await screen.findByText("network down")).toBeInTheDocument();
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+  });
+
+  it("C3: surfaces an inline error when the social links save rejects", async () => {
+    const user = userEvent.setup();
+    const props = makeProps({
+      onSaveStallIdentity: vi.fn().mockRejectedValue(new Error("social save failed")),
+    });
+    render(<ProfileForm {...props} />);
+
+    await user.click(screen.getByRole("button", { name: /save social links/i }));
+
+    expect(await screen.findByText("social save failed")).toBeInTheDocument();
+  });
+
+  it("C3: surfaces an inline error when the display name save rejects", async () => {
+    const user = userEvent.setup();
+    const props = makeProps({
+      onSaveDisplayName: vi.fn().mockRejectedValue(new Error("display name save failed")),
+    });
+    render(<ProfileForm {...props} />);
+
+    await user.click(screen.getByRole("button", { name: /save display name/i }));
+
+    expect(await screen.findByText("display name save failed")).toBeInTheDocument();
+  });
+
+  it("C3: surfaces an inline error when the avatar save rejects", async () => {
+    const user = userEvent.setup();
+    const props = makeProps({
+      onSaveAvatar: vi.fn().mockRejectedValue(new Error("avatar save failed")),
+    });
+    render(<ProfileForm {...props} />);
+
+    const file = new File(["hello"], "avatar.png", { type: "image/png" });
+    await user.upload(screen.getByLabelText("Photo"), file);
+    await user.click(screen.getByRole("button", { name: /save photo/i }));
+
+    expect(await screen.findByText("avatar save failed")).toBeInTheDocument();
+  });
+
+  it("C3: surfaces an inline error when the password save rejects", async () => {
+    const user = userEvent.setup();
+    const props = makeProps({
+      onSavePassword: vi.fn().mockRejectedValue(new Error("password save failed")),
+    });
+    render(<ProfileForm {...props} />);
+
+    await user.type(screen.getByLabelText("New password"), "hunter2hunter2");
+    await user.click(screen.getByRole("button", { name: /save password/i }));
+
+    expect(await screen.findByText("password save failed")).toBeInTheDocument();
   });
 
   it("uses TwoColumnSections, never a CSS grid, for the overall layout", () => {
