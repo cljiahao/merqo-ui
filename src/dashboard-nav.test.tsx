@@ -146,4 +146,28 @@ describe("DashboardNav", () => {
     render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
     expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("aria-current");
   });
+
+  it("active desktop link gets pill-style active classes (bg-primary/10 text-primary)", () => {
+    render(
+      <DashboardNav
+        {...baseProps}
+        navLinks={[{ href: "/dashboard", label: "Home" }]}
+        isActiveHref={(href) => href === "/dashboard"}
+      />,
+    );
+    const link = screen.getByRole("link", { name: "Home" });
+    expect(link).toHaveClass("bg-primary/10", "text-primary");
+  });
+
+  it("inactive desktop link does not get the pill-active classes", () => {
+    render(
+      <DashboardNav
+        {...baseProps}
+        navLinks={[{ href: "/dashboard", label: "Home" }]}
+        isActiveHref={() => false}
+      />,
+    );
+    const link = screen.getByRole("link", { name: "Home" });
+    expect(link).not.toHaveClass("bg-primary/10");
+  });
 });

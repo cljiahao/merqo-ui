@@ -58,8 +58,9 @@ export function DashboardNav({
                 data-tour={tourAnchor ? tourAnchor(link.href) : undefined}
                 aria-current={isActiveHref?.(link.href) ? "page" : undefined}
                 className={cn(
-                  "text-muted-foreground hover:text-foreground text-sm font-medium",
-                  isActiveHref?.(link.href) && "text-foreground",
+                  "rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  isActiveHref?.(link.href) &&
+                    "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary",
                 )}
               >
                 {link.label}
@@ -93,8 +94,10 @@ export function DashboardNav({
                 data-tour={tourAnchor ? tourAnchor(link.href) : undefined}
                 aria-current={isActiveHref?.(link.href) ? "page" : undefined}
                 className={cn(
-                  "text-foreground rounded-md px-2 py-2 text-sm font-medium",
-                  isActiveHref?.(link.href) && "text-foreground",
+                  "rounded-lg px-2 py-2 text-sm font-medium",
+                  isActiveHref?.(link.href)
+                    ? "bg-primary/10 text-primary"
+                    : "text-foreground hover:bg-secondary",
                 )}
                 onClick={() => setMobileOpen(false)}
               >

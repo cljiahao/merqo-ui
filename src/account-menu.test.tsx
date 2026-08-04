@@ -190,11 +190,31 @@ describe("AccountMenu", () => {
     expect(screen.queryByText("network unreachable")).not.toBeInTheDocument();
   });
 
-  it("falls back to a generic icon (not an empty avatar) when the vendor name is empty", async () => {
+  it("shows a bullet fallback (not an empty avatar) when the vendor name is empty", async () => {
     render(<AccountMenu {...baseProps} vendor={{ name: "" }} />);
+    expect(screen.getByText("•")).toBeInTheDocument();
+  });
+
+  it("avatar fallback uses a rounded-md ring shape, not a plain circle", () => {
+    render(<AccountMenu {...baseProps} vendor={{ name: "Kopi Corner" }} />);
     const trigger = screen.getByRole("button", { name: /account menu/i });
-    expect(trigger.textContent?.trim()).toBe("");
-    expect(trigger.querySelector("svg")).toBeInTheDocument();
+    const avatar = trigger.querySelector("span");
+    expect(avatar).toHaveClass("rounded-md", "ring-1", "ring-inset", "ring-primary/25");
+  });
+
+  it("avatar fallback shows up to 2 initials from a multi-word name", () => {
+    render(<AccountMenu {...baseProps} vendor={{ name: "Kopi Corner" }} />);
+    expect(screen.getByText("KC")).toBeInTheDocument();
+  });
+
+  it("avatar fallback shows 2 initials from a single dot/underscore/dash-separated name", () => {
+    render(<AccountMenu {...baseProps} vendor={{ name: "jane.doe" }} />);
+    expect(screen.getByText("JD")).toBeInTheDocument();
+  });
+
+  it("avatar fallback shows a bullet for a blank (whitespace-only) name", () => {
+    render(<AccountMenu {...baseProps} vendor={{ name: "   " }} />);
+    expect(screen.getByText("•")).toBeInTheDocument();
   });
 
   it("does not render an extra link when extraLink is not set", async () => {

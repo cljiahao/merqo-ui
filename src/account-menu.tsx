@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { User as UserIcon } from "lucide-react";
 
 import { FeedbackSheet, type FeedbackData } from "./feedback-sheet";
 import { HelpSheet, type SupportRequest } from "./help-sheet";
@@ -55,14 +54,29 @@ function toErrorMessage(error: unknown): string {
     : "Something went wrong. Please try again.";
 }
 
+function initials(name: string): string {
+  const parts = name
+    .trim()
+    .split(/[\s._-]+/)
+    .filter(Boolean);
+  if (parts.length === 0) return "•";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 function AvatarInitial({ name, avatarUrl }: { name: string; avatarUrl?: string }) {
   if (avatarUrl) {
-    return <img src={avatarUrl} alt="" className="size-8 rounded-full object-cover" />;
+    return (
+      <img
+        src={avatarUrl}
+        alt=""
+        className="size-8 rounded-md object-cover ring-1 ring-inset ring-primary/25"
+      />
+    );
   }
-  const initial = name.trim().charAt(0).toUpperCase();
   return (
-    <span className="bg-muted text-muted-foreground flex size-8 items-center justify-center rounded-full text-sm font-medium">
-      {initial || <UserIcon className="size-4" />}
+    <span className="bg-primary/12 text-primary flex size-8 items-center justify-center rounded-md font-mono text-xs font-semibold tracking-tight ring-1 ring-inset ring-primary/25">
+      {initials(name)}
     </span>
   );
 }
