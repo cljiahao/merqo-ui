@@ -5,3 +5,7 @@ export { TwoColumnSections } from "./two-column-sections";
 export type { TwoColumnSectionsProps } from "./two-column-sections";
 export { Section } from "./section";
 export type { SectionProps } from "./section";
+export { FeedbackSheet } from "./feedback-sheet";
+export type { FeedbackSheetProps, FeedbackData } from "./feedback-sheet";
+export { HelpSheet } from "./help-sheet";
+export type { HelpSheetProps, SupportRequest } from "./help-sheet";
