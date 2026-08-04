@@ -26,6 +26,8 @@ export interface FeedbackSheetProps {
   source?: string;
   metric?: string;
   showNps?: boolean;
+  title?: string;
+  description?: string;
   /** Optional hook for a consuming kit's own toast/notification on async failure. */
   onError?: (error: unknown) => void;
 }
@@ -43,6 +45,8 @@ export function FeedbackSheet({
   source = "vendor",
   metric,
   showNps,
+  title = "Feedback",
+  description = "Tell us what's working, or what isn't.",
   onError,
 }: FeedbackSheetProps) {
   const [message, setMessage] = React.useState("");
@@ -73,10 +77,8 @@ export function FeedbackSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Feedback</SheetTitle>
-          <SheetDescription>
-            Tell us what&apos;s working, or what isn&apos;t.
-          </SheetDescription>
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>{description}</SheetDescription>
         </SheetHeader>
         <form
           className="flex flex-1 flex-col gap-4 px-4"

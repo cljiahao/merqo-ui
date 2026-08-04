@@ -121,4 +121,25 @@ describe("HelpSheet", () => {
       category: "billing",
     });
   });
+
+  it("form mode: uses the default title/description when none are given", () => {
+    render(<HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={vi.fn()} />);
+    expect(screen.getByText("Get help")).toBeInTheDocument();
+    expect(screen.getByText("Tell us what you're stuck on.")).toBeInTheDocument();
+  });
+
+  it("form mode: uses the given title/description when provided", () => {
+    render(
+      <HelpSheet
+        open
+        onOpenChange={() => {}}
+        mode="form"
+        onSubmit={vi.fn()}
+        title="Get help"
+        description="Trouble with a pass, payment, or your Pro plan?"
+      />,
+    );
+    expect(screen.getByText("Get help")).toBeInTheDocument();
+    expect(screen.getByText("Trouble with a pass, payment, or your Pro plan?")).toBeInTheDocument();
+  });
 });

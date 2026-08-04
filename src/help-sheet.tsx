@@ -28,6 +28,8 @@ export type HelpSheetProps = {
       mode: "form";
       onSubmit: (data: SupportRequest) => Promise<void>;
       categories?: { value: string; label: string }[];
+      title?: string;
+      description?: string;
     }
 );
 
@@ -40,16 +42,19 @@ function toErrorMessage(error: unknown): string {
 export function HelpSheet(props: HelpSheetProps) {
   const { open, onOpenChange, onError } = props;
 
+  const title =
+    props.mode === "form" ? props.title ?? "Get help" : "Get help";
+  const description =
+    props.mode === "mailto"
+      ? "Reach out and we'll get back to you."
+      : props.description ?? "Tell us what you're stuck on.";
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Get help</SheetTitle>
-          <SheetDescription>
-            {props.mode === "mailto"
-              ? "Reach out and we'll get back to you."
-              : "Tell us what you're stuck on."}
-          </SheetDescription>
+          <SheetTitle>{title}</SheetTitle>
+          <SheetDescription>{description}</SheetDescription>
         </SheetHeader>
         {props.mode === "mailto" ? (
           <div className="px-4">

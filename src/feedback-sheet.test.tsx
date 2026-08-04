@@ -170,4 +170,24 @@ describe("FeedbackSheet", () => {
       nps: 9,
     });
   });
+
+  it("uses the default title/description when none are given", () => {
+    render(<FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} />);
+    expect(screen.getByText("Feedback")).toBeInTheDocument();
+    expect(screen.getByText("Tell us what's working, or what isn't.")).toBeInTheDocument();
+  });
+
+  it("uses the given title/description when provided", () => {
+    render(
+      <FeedbackSheet
+        open
+        onOpenChange={() => {}}
+        onSubmit={vi.fn()}
+        title="Share feedback"
+        description="What's working, what's missing, what's broken?"
+      />,
+    );
+    expect(screen.getByText("Share feedback")).toBeInTheDocument();
+    expect(screen.getByText("What's working, what's missing, what's broken?")).toBeInTheDocument();
+  });
 });
