@@ -7,6 +7,8 @@ import { AtSign, Globe, Image as ImageIcon, KeyRound, Store, User } from "lucide
 import { Section } from "./section";
 import { TwoColumnSections } from "./two-column-sections";
 import { useAsyncAction } from "./use-async-action";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import {
   ImageUploader,
   type ImageResizeResult,
@@ -59,6 +61,12 @@ export interface ProfileFormProps {
   onAvatarError?: (error: unknown) => void;
   /** Optional hook for a consuming kit's own toast/notification on async failure. */
   onError?: (error: unknown) => void;
+  /**
+   * Forwarded verbatim to every one of `ProfileForm`'s 5 internal `Section`
+   * calls' own `wrapper` prop — lets a kit apply the same card shell to
+   * every section of the composed form. See `Section`'s own `wrapper` prop.
+   */
+  sectionWrapper?: (content: React.ReactNode) => React.ReactNode;
 }
 
 // Client-side validation schemas (see docs/business §2.5 client-validation
@@ -116,6 +124,7 @@ export function ProfileForm({
   avatarMaxDim,
   onAvatarError,
   onError,
+  sectionWrapper,
 }: ProfileFormProps) {
   const [stallName, setStallName] = React.useState(initial.stallName);
   const [socialLinks, setSocialLinks] = React.useState(initial.socialLinks);
@@ -170,7 +179,12 @@ export function ProfileForm({
 
   const columnOne = (
     <>
-      <Section icon={<Store className="size-5" />} eyebrow="Shown to customers" title={stallNameLabel}>
+      <Section
+        icon={<Store className="size-5" />}
+        eyebrow="Shown to customers"
+        title={stallNameLabel}
+        wrapper={sectionWrapper}
+      >
         <form
           className="flex flex-col gap-3"
           onSubmit={(event) => {
@@ -188,14 +202,11 @@ export function ProfileForm({
               .catch((err) => onError?.(err));
           }}
         >
-          <label htmlFor="profile-stall-name" className="text-sm font-medium">
-            {stallNameLabel}
-          </label>
-          <input
+          <Label htmlFor="profile-stall-name">{stallNameLabel}</Label>
+          <Input
             id="profile-stall-name"
             value={stallName}
             onChange={(event) => setStallName(event.target.value)}
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           />
           <FieldError message={stallNameValidationError} />
           <FieldError
@@ -207,7 +218,12 @@ export function ProfileForm({
         </form>
       </Section>
 
-      <Section icon={<ImageIcon className="size-5" />} eyebrow="Shown to customers" title="Profile picture">
+      <Section
+        icon={<ImageIcon className="size-5" />}
+        eyebrow="Shown to customers"
+        title="Profile picture"
+        wrapper={sectionWrapper}
+      >
         <ImageUploader
           bucket={avatarBucket}
           pathPrefix={avatarPathPrefix}
@@ -228,7 +244,12 @@ export function ProfileForm({
         />
       </Section>
 
-      <Section icon={<KeyRound className="size-5" />} eyebrow="Sign-in security" title="Change password">
+      <Section
+        icon={<KeyRound className="size-5" />}
+        eyebrow="Sign-in security"
+        title="Change password"
+        wrapper={sectionWrapper}
+      >
         <form
           className="flex flex-col gap-3"
           onSubmit={(event) => {
@@ -244,15 +265,12 @@ export function ProfileForm({
             passwordSave.run(parsed.data).catch((err) => onError?.(err));
           }}
         >
-          <label htmlFor="profile-new-password" className="text-sm font-medium">
-            New password
-          </label>
-          <input
+          <Label htmlFor="profile-new-password">New password</Label>
+          <Input
             id="profile-new-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           />
           <FieldError message={passwordValidationError} />
           <FieldError
@@ -266,7 +284,12 @@ export function ProfileForm({
 
   const columnTwo = (
     <>
-      <Section icon={<User className="size-5" />} eyebrow="Just for you" title="Display name">
+      <Section
+        icon={<User className="size-5" />}
+        eyebrow="Just for you"
+        title="Display name"
+        wrapper={sectionWrapper}
+      >
         <form
           className="flex flex-col gap-3"
           onSubmit={(event) => {
@@ -282,14 +305,11 @@ export function ProfileForm({
             displayNameSave.run(parsed.data).catch((err) => onError?.(err));
           }}
         >
-          <label htmlFor="profile-display-name" className="text-sm font-medium">
-            Display name
-          </label>
-          <input
+          <Label htmlFor="profile-display-name">Display name</Label>
+          <Input
             id="profile-display-name"
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           />
           <FieldError message={displayNameValidationError} />
           <FieldError
@@ -299,7 +319,12 @@ export function ProfileForm({
         </form>
       </Section>
 
-      <Section icon={<AtSign className="size-5" />} eyebrow="Shown to customers" title="Social links">
+      <Section
+        icon={<AtSign className="size-5" />}
+        eyebrow="Shown to customers"
+        title="Social links"
+        wrapper={sectionWrapper}
+      >
         <form
           className="flex flex-col gap-3"
           onSubmit={(event) => {
@@ -314,49 +339,39 @@ export function ProfileForm({
               .catch((err) => onError?.(err));
           }}
         >
-          <label htmlFor="profile-instagram" className="text-sm font-medium">
-            Instagram
-          </label>
-          <input
+          <Label htmlFor="profile-instagram">Instagram</Label>
+          <Input
             id="profile-instagram"
             value={socialLinks.instagram ?? ""}
             onChange={(event) =>
               setSocialLinks((links) => ({ ...links, instagram: event.target.value }))
             }
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           />
-          <label htmlFor="profile-website" className="flex items-center gap-1.5 text-sm font-medium">
+          <Label htmlFor="profile-website">
             <Globe className="size-3.5" /> Website
-          </label>
-          <input
+          </Label>
+          <Input
             id="profile-website"
             value={socialLinks.website ?? ""}
             onChange={(event) =>
               setSocialLinks((links) => ({ ...links, website: event.target.value }))
             }
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           />
-          <label htmlFor="profile-facebook" className="text-sm font-medium">
-            Facebook
-          </label>
-          <input
+          <Label htmlFor="profile-facebook">Facebook</Label>
+          <Input
             id="profile-facebook"
             value={socialLinks.facebook ?? ""}
             onChange={(event) =>
               setSocialLinks((links) => ({ ...links, facebook: event.target.value }))
             }
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           />
-          <label htmlFor="profile-tiktok" className="text-sm font-medium">
-            TikTok
-          </label>
-          <input
+          <Label htmlFor="profile-tiktok">TikTok</Label>
+          <Input
             id="profile-tiktok"
             value={socialLinks.tiktok ?? ""}
             onChange={(event) =>
               setSocialLinks((links) => ({ ...links, tiktok: event.target.value }))
             }
-            className="border-input bg-background h-9 rounded-md border px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           />
           <FieldError
             message={socialLinksSave.error ? toErrorMessage(socialLinksSave.error) : null}

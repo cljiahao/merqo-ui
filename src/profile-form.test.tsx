@@ -492,4 +492,29 @@ describe("ProfileForm", () => {
     const { container } = render(<ProfileForm {...makeProps()} />);
     expect(container.querySelector(".grid")).not.toBeInTheDocument();
   });
+
+  it("stall-name field uses a real <label htmlFor> associated with the input (shadcn Label/Input)", () => {
+    render(<ProfileForm {...makeProps()} />);
+    const input = screen.getByLabelText("Stall name");
+    expect(input.tagName).toBe("INPUT");
+  });
+
+  it("sectionWrapper: wraps every internal Section's content when provided", () => {
+    render(
+      <ProfileForm
+        {...makeProps({
+          sectionWrapper: (content) => (
+            <article data-testid="wrapped-section">{content}</article>
+          ),
+        })}
+      />,
+    );
+    // 5 sections: stall name, avatar, password, display name, social links.
+    expect(screen.getAllByTestId("wrapped-section")).toHaveLength(5);
+  });
+
+  it("no sectionWrapper: Sections render their default shell (regression guard)", () => {
+    const { container } = render(<ProfileForm {...makeProps()} />);
+    expect(container.querySelectorAll("section").length).toBeGreaterThan(0);
+  });
 });
