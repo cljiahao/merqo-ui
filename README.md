@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.7.0"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.8.0"
 }
 ```
 
@@ -156,7 +156,10 @@ works locally.
   component reference), optional `eyebrow?: string`, title, optional
   `description?: string`, optional `tooltip?: ReactNode` (rich content, not
   just a string). Kit-specific skins (e.g. a paper texture) layer on top via
-  `className`, not baked into the component.
+  `className`, not baked into the component. Optional `wrapper?: (content:
+  ReactNode) => ReactNode` overrides the default `<section>` shell entirely
+  (e.g. a kit's own bordered/textured card) — when set, `className` and the
+  default bg-card/border/shadow classes don't apply.
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
   `HelpSheet` supports a plain `mailto:` mode for kits with no
   ticket-queue infra yet, or a real form mode. `FeedbackSheet` takes an
@@ -169,8 +172,11 @@ works locally.
   omit either for this package's own defaults.
 - `AccountMenu` — the avatar dropdown alone (Profile, optional kit-local
   settings, optional Plan, Get help, Feedback, Sign out — always last,
-  separated, destructive-styled). Reusable without the full nav shell.
-  Takes an optional `extraLink?: {href, label}` for a kit-specific menu
+  separated, destructive-styled). Reusable without the full nav shell. The
+  trigger renders the cross-kit default avatar shape — a rounded-md ring
+  avatar (image when `avatarUrl` is set, otherwise a 2-letter initials
+  fallback) — no per-kit override needed. Takes an optional
+  `extraLink?: {href, label}` for a kit-specific menu
   item, and forwards `showNps` to its internal `FeedbackSheet` and
   `getHelp.categories` (when `getHelp.type === "form"`) to its internal
   `HelpSheet`. `vendor.subtitle?: string` (e.g. the signed-in email) shows
@@ -183,13 +189,19 @@ works locally.
   at every viewport). Composes `AccountMenu`. The burger always carries
   `data-tour="nav-menu"`. Optional `tourAnchor?: (href) => string` stamps
   `data-tour` on each nav link; optional `isActiveHref?: (href) => boolean`
-  applies active styling and `aria-current="page"` — both injected, since
-  this package has no router dependency of its own.
+  applies the cross-kit default active styling — a primary-tinted pill —
+  and `aria-current="page"` — both injected, since this package has no
+  router dependency of its own.
 - `ProfileForm` — the full profile/settings page composition (stall/shop
   name → photo → password | display name → social links), each section
   independently saved. Never calls a backend directly — every mutation is
   an injected prop, so this component isn't coupled to any one kit's data
-  layer. The avatar section composes `ImageUploader` internally (preview,
+  layer. Built on the package's own vendored shadcn `Input`/`Label`
+  primitives (no more raw `<input>`/`<label>` elements). Optional
+  `sectionWrapper?: (content: ReactNode) => ReactNode` forwards straight
+  through to every one of its 5 internal `Section` calls' own `wrapper`
+  prop, so a consuming kit can wrap every section in its own card shell in
+  one place. The avatar section composes `ImageUploader` internally (preview,
   remove, client-side resize, validation) — pass through `avatarBucket`,
   `avatarPathPrefix`, `onAvatarUpload`, and the optional `avatar*` passthroughs
   matching `ImageUploader`'s own props; `onSaveAvatar` now receives the
