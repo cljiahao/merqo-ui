@@ -269,7 +269,7 @@ describe("ProfileForm", () => {
   });
 
   it("I6: renders the given avatarUrl as a preview (via ImageUploader) in the Profile picture section", () => {
-    const { container } = render(
+    render(
       <ProfileForm
         {...makeProps({
           initial: {
@@ -281,9 +281,13 @@ describe("ProfileForm", () => {
         })}
       />,
     );
-    const avatar = container.querySelector("img");
+    // Scope the <img> lookup to the same wrapper as the "Remove image"
+    // button (both are rendered by ImageUploader's own preview block) so
+    // this stays correct if the form ever grows a second image elsewhere.
+    const removeButton = screen.getByRole("button", { name: "Remove image" });
+    const avatarPreviewContainer = removeButton.closest("div");
+    const avatar = avatarPreviewContainer?.querySelector("img");
     expect(avatar).toHaveAttribute("src", "https://example.com/avatar.png");
-    expect(screen.getByRole("button", { name: "Remove image" })).toBeInTheDocument();
   });
 
   it("I6: renders the ImageUploader upload trigger (no preview) when avatarUrl is undefined", () => {
@@ -378,6 +382,60 @@ describe("ProfileForm", () => {
       expect(onSaveAvatar).toHaveBeenCalledWith("https://cdn.example.test/uploaded.jpg"),
     );
     expect(onSaveAvatar).not.toHaveBeenCalledWith(file);
+  });
+
+  it("REGRESSION: after a successful avatar upload, the visible DOM updates to show the preview/remove button, not just onSaveAvatar being called", async () => {
+    const onSaveAvatar = vi.fn().mockResolvedValue(undefined);
+    const onAvatarUpload = vi.fn().mockResolvedValue("https://cdn.example.test/uploaded.jpg");
+    const { container } = render(
+      <ProfileForm
+        {...makeProps({
+          onSaveAvatar,
+          avatarBucket: "vendor-avatars",
+          avatarPathPrefix: "vendor-123",
+          onAvatarUpload,
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /add photo/i })).toBeInTheDocument();
+
+    const file = new File(["hello"], "avatar.png", { type: "image/png" });
+    await uploadAvatarFile(container, file);
+
+    await waitFor(() => expect(onSaveAvatar).toHaveBeenCalled());
+
+    // The DOM must reflect the new avatar immediately, without waiting for
+    // the parent to re-render with a fresh `initial.avatarUrl` from outside.
+    const removeButton = screen.getByRole("button", { name: "Remove image" });
+    expect(screen.queryByRole("button", { name: /add photo/i })).not.toBeInTheDocument();
+    const preview = removeButton.closest("div")?.querySelector("img");
+    expect(preview).toHaveAttribute("src", "https://cdn.example.test/uploaded.jpg");
+  });
+
+  it("REGRESSION: clicking Remove image clears the visible preview immediately", async () => {
+    const onSaveAvatar = vi.fn().mockResolvedValue(undefined);
+    render(
+      <ProfileForm
+        {...makeProps({
+          onSaveAvatar,
+          initial: {
+            stallName: "Manfred's Coffee Cart",
+            socialLinks: { instagram: "", website: "" },
+            displayName: "Manfred",
+            avatarUrl: "https://example.com/avatar.png",
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Remove image" })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove image" }));
+
+    await waitFor(() => expect(onSaveAvatar).toHaveBeenCalledWith(null));
+    expect(screen.getByRole("button", { name: /add photo/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove image" })).not.toBeInTheDocument();
   });
 
   it("saving social links includes facebook and tiktok fields", async () => {

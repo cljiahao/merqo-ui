@@ -120,6 +120,7 @@ export function ProfileForm({
   const [stallName, setStallName] = React.useState(initial.stallName);
   const [socialLinks, setSocialLinks] = React.useState(initial.socialLinks);
   const [displayName, setDisplayName] = React.useState(initial.displayName);
+  const [avatarUrl, setAvatarUrl] = React.useState(initial.avatarUrl ?? null);
   const [password, setPassword] = React.useState("");
 
   const [stallNameValidationError, setStallNameValidationError] = React.useState<
@@ -210,8 +211,11 @@ export function ProfileForm({
         <ImageUploader
           bucket={avatarBucket}
           pathPrefix={avatarPathPrefix}
-          value={initial.avatarUrl ?? null}
-          onChange={(url) => avatarSave.run(url).catch((err) => onError?.(err))}
+          value={avatarUrl}
+          onChange={(url) => {
+            setAvatarUrl(url);
+            avatarSave.run(url).catch((err) => onError?.(err));
+          }}
           onUpload={onAvatarUpload}
           resizeImage={resizeAvatarImage}
           maxBytes={avatarMaxBytes}
