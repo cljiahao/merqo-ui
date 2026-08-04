@@ -65,7 +65,7 @@ function buildDriverConfig(
     nextBtnText: "Next",
     prevBtnText: "Back",
     doneBtnText: "Done",
-    popoverClass: cn("merqo-tour-popover", scopeClassName),
+    popoverClass: cn("tour-popover", scopeClassName),
     steps: steps.map((step) => ({
       element: step.element,
       popover: { title: step.title, description: step.description },
@@ -83,19 +83,73 @@ function popoverCss(scopeClassName: string): string {
 .driver-popover.${scopeClassName} {
   background: var(--popover);
   color: var(--popover-foreground);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow:
+    0 10px 30px -12px rgb(0 0 0 / 0.35),
+    0 2px 8px -4px rgb(0 0 0 / 0.2);
   font-family: var(--font-sans);
+  max-width: 320px;
 }
 .driver-popover.${scopeClassName} .driver-popover-title {
   font-family: var(--font-display, var(--font-sans));
-  color: var(--popover-foreground);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--foreground);
 }
-.driver-popover.${scopeClassName} .driver-popover-next-btn,
-.driver-popover.${scopeClassName} .driver-popover-prev-btn,
+.driver-popover.${scopeClassName} .driver-popover-description {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.driver-popover.${scopeClassName} .driver-popover-progress-text {
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
 .driver-popover.${scopeClassName} .driver-popover-close-btn {
-  background: var(--primary);
-  color: var(--primary-foreground);
+  color: var(--muted-foreground);
+  transition: color 0.15s ease;
+}
+.driver-popover.${scopeClassName} .driver-popover-close-btn:hover {
+  color: var(--foreground);
+}
+.driver-popover.${scopeClassName} .driver-popover-prev-btn,
+.driver-popover.${scopeClassName} .driver-popover-next-btn {
+  text-shadow: none;
   border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.3rem 0.7rem;
+  transition: background 0.15s ease;
+}
+.driver-popover.${scopeClassName} .driver-popover-prev-btn:hover,
+.driver-popover.${scopeClassName} .driver-popover-next-btn:hover {
+  background: var(--muted);
+}
+.driver-popover.${scopeClassName} .driver-popover-next-btn {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.driver-popover.${scopeClassName} .driver-popover-next-btn:hover {
+  background: var(--primary);
+  opacity: 0.9;
+}
+.driver-popover.${scopeClassName} .driver-popover-arrow-side-left {
+  border-left-color: var(--popover);
+}
+.driver-popover.${scopeClassName} .driver-popover-arrow-side-right {
+  border-right-color: var(--popover);
+}
+.driver-popover.${scopeClassName} .driver-popover-arrow-side-top {
+  border-top-color: var(--popover);
+}
+.driver-popover.${scopeClassName} .driver-popover-arrow-side-bottom {
+  border-bottom-color: var(--popover);
 }
 `;
 }

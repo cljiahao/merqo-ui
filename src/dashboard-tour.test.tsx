@@ -383,6 +383,26 @@ describe("DashboardTour — driver.js config", () => {
     vi.doUnmock("driver.js");
   });
 
+  it('uses a generic "tour-popover" base class, not a kit-specific name', async () => {
+    const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
+      drive: vi.fn(),
+      destroy: vi.fn(),
+    }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    render(<FreshDashboardTour {...baseProps({ seen: false })} />);
+    await waitFor(() => expect(driverSpy).toHaveBeenCalledTimes(1));
+
+    const config = driverSpy.mock.calls[0][0];
+    expect(config.popoverClass).toContain("tour-popover");
+    expect(config.popoverClass).not.toContain("merqo-tour-popover");
+
+    vi.doUnmock("driver.js");
+  });
+
   it("does not auto-start driver.js for a user who has already seen the tour, but starts it on replay click", async () => {
     const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
       drive: vi.fn(),
@@ -447,12 +467,28 @@ describe("DashboardTour — injected popover CSS", () => {
     expect(style?.textContent).toContain(".test-tour");
   });
 
-  it("uses only CSS custom-property values, never a literal color/font/radius", () => {
+  it("uses only CSS custom-property values, never a literal color/font/radius (box-shadow's raw rgb() alpha-black tint is the sole, deliberate exception — there is no cross-kit shadow-color token)", () => {
     render(<DashboardTour {...baseProps({ seen: true })} />);
     const css = document.getElementById("merqo-tour-styles")?.textContent ?? "";
     expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
-    expect(css).not.toMatch(/\brgb\(|\bhsl\(|\boklch\(/);
+    expect(css).not.toMatch(/\bhsl\(|\boklch\(/);
     expect(css).toContain("var(--popover)");
+  });
+
+  it("injects the full popover ruleset (title, description, progress-text, close-btn, prev/next-btn, arrow tints), not just the minimal subset", async () => {
+    render(<DashboardTour {...baseProps({ seen: true })} />);
+    const styleEl = document.getElementById("merqo-tour-styles");
+    const css = styleEl?.textContent ?? "";
+    expect(css).toContain(".driver-popover-title");
+    expect(css).toContain(".driver-popover-description");
+    expect(css).toContain(".driver-popover-progress-text");
+    expect(css).toContain(".driver-popover-close-btn");
+    expect(css).toContain(".driver-popover-prev-btn");
+    expect(css).toContain(".driver-popover-next-btn");
+    expect(css).toContain(".driver-popover-arrow-side-left");
+    expect(css).toContain(".driver-popover-arrow-side-right");
+    expect(css).toContain(".driver-popover-arrow-side-top");
+    expect(css).toContain(".driver-popover-arrow-side-bottom");
   });
 
   it("does not duplicate the <style> element when mounted twice", () => {
