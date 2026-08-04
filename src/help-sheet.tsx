@@ -14,6 +14,7 @@ import {
 
 export interface SupportRequest {
   message: string;
+  category?: string;
 }
 
 export type HelpSheetProps = {
@@ -23,7 +24,11 @@ export type HelpSheetProps = {
   onError?: (error: unknown) => void;
 } & (
   | { mode: "mailto"; address: string }
-  | { mode: "form"; onSubmit: (data: SupportRequest) => Promise<void> }
+  | {
+      mode: "form";
+      onSubmit: (data: SupportRequest) => Promise<void>;
+      categories?: { value: string; label: string }[];
+    }
 );
 
 function toErrorMessage(error: unknown): string {
@@ -56,7 +61,12 @@ export function HelpSheet(props: HelpSheetProps) {
             </a>
           </div>
         ) : (
-          <HelpForm onSubmit={props.onSubmit} onOpenChange={onOpenChange} onError={onError} />
+          <HelpForm
+            onSubmit={props.onSubmit}
+            onOpenChange={onOpenChange}
+            onError={onError}
+            categories={props.categories}
+          />
         )}
       </SheetContent>
     </Sheet>
@@ -67,16 +77,25 @@ function HelpForm({
   onSubmit,
   onOpenChange,
   onError,
+  categories,
 }: {
   onSubmit: (data: SupportRequest) => Promise<void>;
   onOpenChange: (open: boolean) => void;
   onError?: (error: unknown) => void;
+  categories?: { value: string; label: string }[];
 }) {
   const [message, setMessage] = React.useState("");
+  const [category, setCategory] = React.useState<string | undefined>(categories?.[0]?.value);
+
   const { pending, error, run } = useAsyncAction(async () => {
     if (!message.trim()) return;
-    await onSubmit({ message });
+    const payload: SupportRequest = { message };
+    if (categories && category) {
+      payload.category = category;
+    }
+    await onSubmit(payload);
     setMessage("");
+    setCategory(categories?.[0]?.value);
     onOpenChange(false);
   });
 
@@ -88,6 +107,32 @@ function HelpForm({
         run().catch((err) => onError?.(err));
       }}
     >
+      {categories && (
+        <div className="flex flex-col gap-2">
+          <div
+            role="radiogroup"
+            aria-label="What's it about?"
+            className="grid grid-cols-2 gap-1.5"
+          >
+            {categories.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                role="radio"
+                aria-checked={category === c.value}
+                onClick={() => setCategory(c.value)}
+                className={`flex items-center justify-center rounded-md border px-2 py-2 text-sm font-medium transition-colors ${
+                  category === c.value
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input text-muted-foreground hover:border-primary/50"
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="flex flex-1 flex-col gap-2">
         <label htmlFor="help-message" className="text-sm font-medium">
           Message

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HelpSheet } from "./help-sheet";
 
@@ -56,5 +56,62 @@ describe("HelpSheet", () => {
 
     expect(await screen.findByText("could not send")).toBeInTheDocument();
     expect(onError).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it("form mode: does not render a category grid when categories is not set", () => {
+    render(<HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={vi.fn()} />);
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+  });
+
+  it("form mode: renders a category radiogroup with the first category pre-selected", () => {
+    render(
+      <HelpSheet
+        open
+        onOpenChange={() => {}}
+        mode="form"
+        onSubmit={vi.fn()}
+        categories={[
+          { value: "vendor_access", label: "Vendor access" },
+          { value: "billing", label: "Billing" },
+        ]}
+      />,
+    );
+    const group = screen.getByRole("radiogroup", { name: /what's it about/i });
+    const buttons = within(group).getAllByRole("radio");
+    expect(buttons).toHaveLength(2);
+    expect(screen.getByRole("radio", { name: "Vendor access" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    expect(screen.getByRole("radio", { name: "Billing" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+  });
+
+  it("form mode: includes the selected category in the onSubmit payload", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(
+      <HelpSheet
+        open
+        onOpenChange={() => {}}
+        mode="form"
+        onSubmit={onSubmit}
+        categories={[
+          { value: "vendor_access", label: "Vendor access" },
+          { value: "billing", label: "Billing" },
+        ]}
+      />,
+    );
+
+    await user.click(screen.getByRole("radio", { name: "Billing" }));
+    await user.type(screen.getByLabelText(/message/i), "Can't access my account");
+    await user.click(screen.getByRole("button", { name: /send/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      message: "Can't access my account",
+      category: "billing",
+    });
   });
 });
