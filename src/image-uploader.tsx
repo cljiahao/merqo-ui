@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ImagePlus, Loader2 } from "lucide-react";
+import { ImagePlus, Loader2, X } from "lucide-react";
 
 import { cn } from "./lib/utils";
 
@@ -109,6 +109,17 @@ function passthroughResize(file: File): ImageResizeResult {
   return { blob: file, ext, type: file.type || "application/octet-stream" };
 }
 
+/**
+ * Default preview renderer. A kit that has configured its `next.config.ts`
+ * `images.remotePatterns` for its storage host should pass `next/image` (or
+ * its own wrapper) as `imageComponent` instead — see the package README.
+ * `fill`/`sizes` are accepted and ignored here; this <img> just fills the
+ * already-sized, relatively-positioned container.
+ */
+function DefaultPreviewImage({ src, alt, className }: ImagePreviewProps) {
+  return <img src={src} alt={alt} className={cn("size-full", className)} />;
+}
+
 export function ImageUploader({
   bucket,
   pathPrefix,
@@ -129,6 +140,9 @@ export function ImageUploader({
 
   const effectiveMaxDim = maxDim ?? DEFAULT_MAX_DIM[variant];
   const box = variant === "thumb" ? "size-20 shrink-0" : "h-40 w-full";
+  const PreviewImage = imageComponent ?? DefaultPreviewImage;
+  const previewSizes =
+    variant === "thumb" ? "5rem" : "(max-width: 640px) 100vw, 28rem";
 
   function fail(message: string, error: unknown) {
     setErrorMessage(message);
@@ -176,47 +190,72 @@ export function ImageUploader({
         className,
       )}
     >
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={uploading}
-        // Stable accessible name: the visible label flips to "…"/"Optimizing…"
-        // while an upload is in flight, which would otherwise leave the button
-        // with a meaningless accessible name exactly when it's busy.
-        aria-label={variant === "banner" ? "Add a booth banner" : "Add photo"}
-        className={cn(
-          "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed transition-colors disabled:opacity-60",
-          box,
-        )}
-      >
-        {uploading ? (
-          <Loader2
-            className={cn("animate-spin", variant === "thumb" ? "size-4" : "size-6")}
+      {value ? (
+        <div
+          className={cn(
+            "border-border relative overflow-hidden rounded-xl border",
+            box,
+          )}
+        >
+          <PreviewImage
+            src={value}
+            alt=""
+            fill
+            sizes={previewSizes}
+            className="object-cover"
           />
-        ) : (
-          <ImagePlus className={variant === "thumb" ? "size-4" : "size-6"} />
-        )}
-        {variant === "banner" ? (
-          <>
-            <span className="text-sm font-medium">
-              {uploading ? "Optimizing…" : "Add a booth banner"}
-            </span>
-            <span className="text-xs">JPEG, PNG, or WebP, optimized on upload</span>
-            <span className="text-xs">Best at a 3:1 wide ratio (e.g. 1200×400)</span>
-          </>
-        ) : (
-          <>
-            <span className="text-[10px] leading-tight font-medium">
-              {uploading ? "…" : "Add photo"}
-            </span>
-            {!uploading && (
-              <span className="text-muted-foreground/80 text-[9px] leading-tight">
-                JPG · PNG · WebP
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            className="bg-background/90 text-foreground hover:bg-background absolute top-1.5 right-1.5 inline-flex size-7 items-center justify-center rounded-full shadow-sm backdrop-blur"
+            aria-label="Remove image"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          // Stable accessible name: the visible label flips to "…"/"Optimizing…"
+          // while an upload is in flight, which would otherwise leave the button
+          // with a meaningless accessible name exactly when it's busy.
+          aria-label={variant === "banner" ? "Add a booth banner" : "Add photo"}
+          className={cn(
+            "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed transition-colors disabled:opacity-60",
+            box,
+          )}
+        >
+          {uploading ? (
+            <Loader2
+              className={cn("animate-spin", variant === "thumb" ? "size-4" : "size-6")}
+            />
+          ) : (
+            <ImagePlus className={variant === "thumb" ? "size-4" : "size-6"} />
+          )}
+          {variant === "banner" ? (
+            <>
+              <span className="text-sm font-medium">
+                {uploading ? "Optimizing…" : "Add a booth banner"}
               </span>
-            )}
-          </>
-        )}
-      </button>
+              <span className="text-xs">JPEG, PNG, or WebP, optimized on upload</span>
+              <span className="text-xs">Best at a 3:1 wide ratio (e.g. 1200×400)</span>
+            </>
+          ) : (
+            <>
+              <span className="text-[10px] leading-tight font-medium">
+                {uploading ? "…" : "Add photo"}
+              </span>
+              {!uploading && (
+                <span className="text-muted-foreground/80 text-[9px] leading-tight">
+                  JPG · PNG · WebP
+                </span>
+              )}
+            </>
+          )}
+        </button>
+      )}
 
       {/* Deliberately a sibling of the trigger, not a child: an <input> is
           interactive content and is invalid inside a <button>, and the
