@@ -13,3 +13,5 @@ export { AccountMenu } from "./account-menu";
 export type { AccountMenuProps, AccountMenuGetHelp } from "./account-menu";
 export { DashboardNav } from "./dashboard-nav";
 export type { DashboardNavProps } from "./dashboard-nav";
+export { ProfileForm } from "./profile-form";
+export type { ProfileFormProps, ProfileFormInitial, SocialLinks } from "./profile-form";
