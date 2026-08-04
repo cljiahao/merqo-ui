@@ -1,7 +1,7 @@
 # @merqo/ui
 
 Shared structural/behavioral components for the Merqo kit family
-(loopkit, merqo, paykit, qkit, stockkit). Ships **no color, font, or
+(loopkit, merqo, paykit, qkit, stockkit). Ships **no color, font-family, or
 radius values** — every component styles itself with shadcn's semantic
 Tailwind classes only, so each kit's own `globals.css` token values
 drive the rendered brand color automatically.
@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.2.0"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.3.0"
 }
 ```
 
@@ -146,7 +146,9 @@ works locally.
   with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
   step, and an injected storage write (`onUpload`) so the package stays
   backend-agnostic. `uploading` always resets — success, validation failure,
-  or throw.
+  or throw. Default `variant` is `"thumb"` — qkit's booth-banner usage
+  **must** pass `variant="banner"` explicitly when migrating, or it will
+  silently render as a small square with the wrong resize target.
 
 ## Usage
 
