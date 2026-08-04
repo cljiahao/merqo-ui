@@ -60,6 +60,46 @@ function buildDriverConfig(
   };
 }
 
+const STYLE_ELEMENT_ID = "merqo-tour-styles";
+
+// One shared block per scope class, appended (not replaced) so multiple
+// kit-branded tours mounted in the same document each keep their own rule.
+function popoverCss(scopeClassName: string): string {
+  return `
+.driver-popover.${scopeClassName} {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+}
+.driver-popover.${scopeClassName} .driver-popover-title {
+  font-family: var(--font-display, var(--font-sans));
+  color: var(--popover-foreground);
+}
+.driver-popover.${scopeClassName} .driver-popover-next-btn,
+.driver-popover.${scopeClassName} .driver-popover-prev-btn,
+.driver-popover.${scopeClassName} .driver-popover-close-btn {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: var(--radius-md);
+}
+`;
+}
+
+function ensureScopedStyles(scopeClassName: string) {
+  let styleEl = document.getElementById(
+    STYLE_ELEMENT_ID,
+  ) as HTMLStyleElement | null;
+  if (!styleEl) {
+    styleEl = document.createElement("style");
+    styleEl.id = STYLE_ELEMENT_ID;
+    document.head.appendChild(styleEl);
+  }
+  if (!styleEl.textContent?.includes(`.${scopeClassName} {`)) {
+    styleEl.textContent = (styleEl.textContent ?? "") + popoverCss(scopeClassName);
+  }
+}
+
 export function DashboardTour({
   steps,
   seen,
@@ -96,6 +136,10 @@ export function DashboardTour({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHomeRoute]);
+
+  React.useEffect(() => {
+    ensureScopedStyles(scopeClassName);
+  }, [scopeClassName]);
 
   if (!isHomeRoute) return null;
 

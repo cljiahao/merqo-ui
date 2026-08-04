@@ -157,3 +157,37 @@ describe("DashboardTour — driver.js config", () => {
     vi.doUnmock("driver.js");
   });
 });
+
+describe("DashboardTour — injected popover CSS", () => {
+  it("injects a <style> element scoped to scopeClassName", () => {
+    render(<DashboardTour {...baseProps({ seen: true })} />);
+    const style = document.getElementById("merqo-tour-styles");
+    expect(style).toBeInTheDocument();
+    expect(style?.textContent).toContain(".test-tour");
+  });
+
+  it("uses only CSS custom-property values, never a literal color/font/radius", () => {
+    render(<DashboardTour {...baseProps({ seen: true })} />);
+    const css = document.getElementById("merqo-tour-styles")?.textContent ?? "";
+    expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+    expect(css).not.toMatch(/\brgb\(|\bhsl\(|\boklch\(/);
+    expect(css).toContain("var(--popover)");
+  });
+
+  it("does not duplicate the <style> element when mounted twice", () => {
+    const { unmount } = render(<DashboardTour {...baseProps({ seen: true })} />);
+    unmount();
+    render(<DashboardTour {...baseProps({ seen: true, scopeClassName: "other-tour" })} />);
+    expect(
+      document.querySelectorAll("#merqo-tour-styles"),
+    ).toHaveLength(1);
+  });
+
+  it("a second mount with a different scopeClassName still gets its own scoped rule available", () => {
+    render(<DashboardTour {...baseProps({ seen: true })} />);
+    render(<DashboardTour {...baseProps({ seen: true, scopeClassName: "second-tour" })} />);
+    const css = document.getElementById("merqo-tour-styles")?.textContent ?? "";
+    expect(css).toContain(".test-tour");
+    expect(css).toContain(".second-tour");
+  });
+});
