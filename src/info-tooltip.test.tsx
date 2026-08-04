@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { InfoTooltip } from "./info-tooltip";
 
 describe("InfoTooltip", () => {
@@ -43,5 +44,32 @@ describe("InfoTooltip", () => {
     await waitFor(() => {
       expect(screen.getByText("More detail")).toBeInTheDocument();
     });
+  });
+
+  it('ariaLabel defaults to "More info" when omitted', () => {
+    render(<InfoTooltip content="Some detail" />);
+    expect(
+      screen.getByRole("button", { name: "More info" }),
+    ).toBeInTheDocument();
+  });
+
+  it("trigger defaults to hover: renders inside a Tooltip, not a Popover", async () => {
+    render(<InfoTooltip content="Some detail" ariaLabel="Detail" />);
+    const trigger = screen.getByRole("button", { name: "Detail" });
+    expect(screen.queryByText("Some detail")).not.toBeInTheDocument();
+    await userEvent.hover(trigger);
+    expect(await screen.findByText("Some detail")).toBeInTheDocument();
+  });
+
+  it('trigger="tap": content opens on click, not on hover', async () => {
+    const user = userEvent.setup();
+    render(
+      <InfoTooltip content="Some detail" ariaLabel="Detail" trigger="tap" />,
+    );
+    const trigger = screen.getByRole("button", { name: "Detail" });
+    await user.hover(trigger);
+    expect(screen.queryByText("Some detail")).not.toBeInTheDocument();
+    await user.click(trigger);
+    expect(await screen.findByText("Some detail")).toBeInTheDocument();
   });
 });
