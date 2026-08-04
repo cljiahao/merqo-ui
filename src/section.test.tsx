@@ -121,4 +121,42 @@ describe("Section", () => {
     expect(html).not.toMatch(/#[0-9a-fA-F]{3,6}\b/);
     expect(html).not.toMatch(/rounded-\[/);
   });
+
+  it("wrapper: renders the wrapper's own output instead of the default <section> shell", () => {
+    render(
+      <Section
+        icon={<span />}
+        title="Stall name"
+        wrapper={(content) => <article data-testid="custom-shell">{content}</article>}
+      >
+        <p>content</p>
+      </Section>,
+    );
+    expect(screen.getByTestId("custom-shell")).toBeInTheDocument();
+    expect(screen.getByText("Stall name")).toBeInTheDocument();
+    expect(screen.getByText("content")).toBeInTheDocument();
+  });
+
+  it("wrapper: the default section shell's classes are not applied when wrapper is set", () => {
+    const { container } = render(
+      <Section
+        icon={<span />}
+        title="Stall name"
+        wrapper={(content) => <article>{content}</article>}
+      >
+        <p>content</p>
+      </Section>,
+    );
+    expect(container.querySelector("section")).not.toBeInTheDocument();
+    expect(container.querySelector("article")).toBeInTheDocument();
+  });
+
+  it("no wrapper: still renders the default <section> shell (regression guard)", () => {
+    const { container } = render(
+      <Section icon={<span />} title="Stall name">
+        <p>content</p>
+      </Section>,
+    );
+    expect(container.querySelector("section")).toBeInTheDocument();
+  });
 });

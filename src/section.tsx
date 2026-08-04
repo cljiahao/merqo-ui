@@ -13,6 +13,15 @@ export interface SectionProps {
   tooltip?: React.ReactNode;
   className?: string;
   children: React.ReactNode;
+  /**
+   * Overrides the default `<section>` shell entirely — e.g. a kit's own
+   * bordered/textured card component. Receives the section's rendered
+   * header+children as `content`; owns its own outer element and classes.
+   * When set, `className` and the default bg-card/border/shadow classes do
+   * NOT apply — pass any classes the wrapper needs inside the wrapper
+   * function itself.
+   */
+  wrapper?: (content: React.ReactNode) => React.ReactNode;
 }
 
 export function Section({
@@ -22,15 +31,11 @@ export function Section({
   description,
   tooltip,
   className,
+  wrapper,
   children,
 }: SectionProps) {
-  return (
-    <section
-      className={cn(
-        "bg-card text-card-foreground flex flex-col gap-4 rounded-xl border p-6 shadow-sm",
-        className,
-      )}
-    >
+  const content = (
+    <>
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <span className="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-full">
@@ -55,6 +60,21 @@ export function Section({
         ) : null}
       </header>
       <div className="flex flex-col gap-4">{children}</div>
+    </>
+  );
+
+  if (wrapper) {
+    return <>{wrapper(content)}</>;
+  }
+
+  return (
+    <section
+      className={cn(
+        "bg-card text-card-foreground flex flex-col gap-4 rounded-xl border p-6 shadow-sm",
+        className,
+      )}
+    >
+      {content}
     </section>
   );
 }
