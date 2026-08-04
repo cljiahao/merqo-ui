@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useAsyncAction } from "./use-async-action";
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { useAsyncAction, navigatingAway } from "./use-async-action";
 
 describe("useAsyncAction", () => {
   it("starts with pending false", () => {
@@ -109,5 +109,36 @@ describe("useAsyncAction", () => {
     });
 
     expect(result.current.error).toBeFalsy();
+  });
+});
+
+describe("navigatingAway", () => {
+  it("navigatingAway returns a promise that never resolves or rejects", async () => {
+    const p = navigatingAway();
+    let settled = false;
+    p.then(
+      () => {
+        settled = true;
+      },
+      () => {
+        settled = true;
+      },
+    );
+    await new Promise((r) => setTimeout(r, 10));
+    expect(settled).toBe(false);
+  });
+
+  it("run() keeps pending true when the action awaits navigatingAway", async () => {
+    const { result } = renderHook(() =>
+      useAsyncAction(async () => {
+        await navigatingAway();
+      }),
+    );
+    act(() => {
+      void result.current.run();
+    });
+    await waitFor(() => expect(result.current.pending).toBe(true));
+    await new Promise((r) => setTimeout(r, 10));
+    expect(result.current.pending).toBe(true);
   });
 });
