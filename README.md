@@ -41,6 +41,23 @@ output:
 Adjust the relative path to match where your `globals.css` actually lives
 relative to `node_modules`.
 
+`sheet.tsx`, `dropdown-menu.tsx`, and `tooltip.tsx` use `animate-in` /
+`slide-in-from-*` / `fade-out-*` utility classes that **do not exist in
+stock Tailwind v4** - they're shipped by the
+[`tw-animate-css`](https://www.npmjs.com/package/tw-animate-css) package.
+Install it in the consuming kit and import it alongside Tailwind in
+`globals.css`:
+
+```css
+@import "tailwindcss";
+@import "tw-animate-css";
+@source "../../node_modules/@merqo/ui/dist";
+```
+
+Without this, the Sheet/DropdownMenu/Tooltip open/close transitions silently
+no-op (the classes just don't exist), which is easy to miss since nothing
+errors - it just never animates.
+
 ### pnpm install-script allowlist
 
 pnpm 11 blocks install scripts by default via an `allowBuilds` allowlist in
