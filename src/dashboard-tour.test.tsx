@@ -1,3 +1,4 @@
+import * as React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { DashboardTour, type DashboardTourProps } from "./dashboard-tour";
@@ -485,6 +486,109 @@ describe("DashboardTour — injected popover CSS", () => {
     );
     const css = document.getElementById("merqo-tour-styles")?.textContent ?? "";
     expect(css).toContain(".driver-popover.driver-popover-title {");
+  });
+});
+
+describe("DashboardTour — regressions (N1, N2)", () => {
+  it("N1: still constructs and drives after React StrictMode's dev-only double-invoke (unmountedRef must reset on remount)", async () => {
+    const drive = vi.fn();
+    const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
+      drive,
+      destroy: vi.fn(),
+    }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    // StrictMode simulates an immediate dev-only unmount+remount right
+    // after the first mount. Without resetting `unmountedRef.current` back
+    // to false on the remount, every future start() call's post-await
+    // guard stays permanently tripped, and the tour would never
+    // construct/drive again for the life of the page.
+    render(
+      <React.StrictMode>
+        <FreshDashboardTour {...baseProps({ seen: false })} />
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => expect(drive).toHaveBeenCalled());
+    expect(drive.mock.calls.length).toBeGreaterThanOrEqual(1);
+
+    vi.doUnmock("driver.js");
+  });
+
+  it("N2: a pending cross-page replay still starts the tour when the steps resolver's identity churns across renders", async () => {
+    const drive = vi.fn();
+    const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
+      drive,
+      destroy: vi.fn(),
+    }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    const navigateHome = vi.fn();
+    // A fresh inline steps resolver on every render simulates a consumer
+    // using steps={() => STEPS} — the README's own recommended SSR-safe
+    // pattern — whose identity churns on every render, and therefore so
+    // does `start`'s identity (start depends on [steps, scopeClassName]).
+    const { rerender } = render(
+      <FreshDashboardTour
+        {...baseProps({
+          seen: true,
+          isHomeRoute: false,
+          navigateHome,
+          steps: () => STEPS,
+        })}
+      />,
+    );
+
+    const button = screen.getByRole("button", {
+      name: "Replay onboarding tour",
+    });
+    await act(async () => {
+      button.click();
+    });
+    expect(navigateHome).toHaveBeenCalledTimes(1);
+
+    // Two separate re-renders landing isHomeRoute: true, each passing a
+    // brand-new steps function identity — simulates two commits settling
+    // in the same frame after router.push (pathname update, then RSC
+    // payload settling). If the resume effect depended on `start`, the
+    // second re-render's identity-only churn would cancel the first
+    // render's scheduled rAF and find the pendingReplay flag already
+    // spent, silently dropping the replay.
+    // Each rerender() call is individually act-wrapped by Testing Library
+    // and flushes its own commit's effects synchronously before returning
+    // — deliberately NOT nested inside one shared `act()` block, which
+    // would let React coalesce both into a single effect pass and never
+    // exercise the intermediate (first) commit's effect run at all.
+    rerender(
+      <FreshDashboardTour
+        {...baseProps({
+          seen: true,
+          isHomeRoute: true,
+          navigateHome,
+          steps: () => STEPS,
+        })}
+      />,
+    );
+    rerender(
+      <FreshDashboardTour
+        {...baseProps({
+          seen: true,
+          isHomeRoute: true,
+          navigateHome,
+          steps: () => STEPS,
+        })}
+      />,
+    );
+
+    await waitFor(() => expect(drive).toHaveBeenCalledTimes(1));
+
+    vi.doUnmock("driver.js");
   });
 });
 

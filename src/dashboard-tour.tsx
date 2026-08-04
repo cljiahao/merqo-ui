@@ -183,6 +183,16 @@ export function DashboardTour({
   // oversight, so it should not be "fixed" later by someone who doesn't
   // know this.
   React.useEffect(() => {
+    // Reset unconditionally, before the early-return below: this effect
+    // (deps []) re-fires on every mount, including React StrictMode's
+    // dev-only simulated unmount+remount. Without this reset, the cleanup
+    // effect below latches `unmountedRef.current = true` on the simulated
+    // unmount and nothing ever clears it again, permanently short-circuiting
+    // every future start() call's post-await guard — the tour would
+    // silently stop constructing/driving for the rest of the page's life
+    // under StrictMode (which every kit runs in dev), while `onFirstSeen`
+    // (below) still fires normally since it happens before that guard.
+    unmountedRef.current = false;
     if (!isHomeRoute || seenAtMountRef.current) return;
     void onFirstSeen();
     const id = requestAnimationFrame(() => void start());
@@ -199,7 +209,20 @@ export function DashboardTour({
     pendingReplayRef.current = false;
     const id = requestAnimationFrame(() => void start());
     return () => cancelAnimationFrame(id);
-  }, [isHomeRoute, start]);
+    // `start` is deliberately NOT a dependency here: this effect should
+    // only react to isHomeRoute transitions. A consumer passing an inline/
+    // identity-churning `steps` resolver (the README's own recommended
+    // SSR-safe pattern) changes `start`'s identity on every render — if
+    // this effect depended on it, two commits landing in the same frame
+    // (realistic right after a router.push: pathname update, then RSC
+    // payload settling) could re-run this effect, consume
+    // `pendingReplayRef`, schedule an rAF, then have the cleanup cancel
+    // that rAF before it fires because a newer effect instance already
+    // spent the flag — silently dropping the replay with no error and no
+    // drive() call. Reading `start` via the closure (current value at the
+    // time the rAF callback actually runs) is fine either way.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHomeRoute]);
 
   React.useEffect(() => {
     ensureScopedStyles(scopeClassName);
@@ -230,7 +253,7 @@ export function DashboardTour({
       data-tour="tour-replay"
       onClick={onReplay}
       aria-label="Replay onboarding tour"
-      className="bg-primary text-primary-foreground ring-border fixed right-5 bottom-5 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full shadow-lg ring-1"
+      className="bg-primary text-primary-foreground ring-border fixed right-5 bottom-5 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full shadow-lg ring-1 transition-transform hover:scale-105"
     >
       <CircleHelp className="h-6 w-6" />
     </button>
