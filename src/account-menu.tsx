@@ -45,6 +45,8 @@ export interface AccountMenuProps {
   /** Optional hook for a consuming kit's own toast/notification on async failure (e.g. a failed sign-out). */
   onError?: (error: unknown) => void;
   extraLink?: { href: string; label: string };
+  /** Optional slot rendered next to the vendor name in the dropdown header (only shown when vendor.subtitle is also set). */
+  tierBadge?: React.ReactNode;
 }
 
 function toErrorMessage(error: unknown): string {
@@ -77,6 +79,7 @@ export function AccountMenu({
   showNps,
   onError,
   extraLink,
+  tierBadge,
 }: AccountMenuProps) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [feedbackOpen, setFeedbackOpen] = React.useState(false);
@@ -107,6 +110,7 @@ export function AccountMenu({
           <button
             type="button"
             aria-label="Account menu"
+            data-tour="nav-account"
             className="focus-visible:ring-ring/50 inline-flex items-center gap-2 rounded-full outline-none focus-visible:ring-2"
           >
             <AvatarInitial name={vendor.name} avatarUrl={vendor.avatarUrl} />
@@ -120,8 +124,9 @@ export function AccountMenu({
         <DropdownMenuContent align="end">
           {vendor.subtitle && (
             <>
-              <DropdownMenuLabel className="text-muted-foreground truncate text-xs font-normal">
-                {vendor.subtitle}
+              <DropdownMenuLabel className="text-muted-foreground flex items-center gap-2 truncate text-xs font-normal">
+                <span className="truncate">{vendor.subtitle}</span>
+                {tierBadge}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
             </>

@@ -268,16 +268,24 @@ describe("AccountMenu", () => {
 
   it("renders vendor.subtitle as a DropdownMenuLabel at the top of the dropdown when provided", async () => {
     await openMenu({ vendor: { name: "Manfred", subtitle: "manfred@example.com" } });
-    // Find the label by its data-slot attribute
-    const label = screen.getByText("manfred@example.com", { selector: "[data-slot='dropdown-menu-label']" });
+    // Find the label by its data-slot attribute (subtitle text is nested in a child span)
+    const label = screen.getByText(
+      (_content, element) =>
+        element?.getAttribute("data-slot") === "dropdown-menu-label" &&
+        element.textContent === "manfred@example.com",
+    );
     expect(label).toBeInTheDocument();
     expect(label).toHaveClass("text-muted-foreground", "text-xs", "font-normal");
   });
 
   it("places the subtitle label before the Profile item with a separator", async () => {
     await openMenu({ vendor: { name: "Manfred", subtitle: "manfred@example.com" } });
-    // Find the label by its data-slot attribute
-    const label = screen.getByText("manfred@example.com", { selector: "[data-slot='dropdown-menu-label']" });
+    // Find the label by its data-slot attribute (subtitle text is nested in a child span)
+    const label = screen.getByText(
+      (_content, element) =>
+        element?.getAttribute("data-slot") === "dropdown-menu-label" &&
+        element.textContent === "manfred@example.com",
+    );
     expect(label).toBeInTheDocument();
 
     const separator = label.nextElementSibling;
@@ -295,5 +303,26 @@ describe("AccountMenu", () => {
     } else {
       expect(previousElement).toBeNull();
     }
+  });
+
+  it("stamps data-tour=\"nav-account\" on the trigger button", () => {
+    render(<AccountMenu {...baseProps} />);
+    expect(screen.getByRole("button", { name: /account menu/i })).toHaveAttribute(
+      "data-tour",
+      "nav-account",
+    );
+  });
+
+  it("does not render a tier badge when tierBadge is not set, even with a subtitle", async () => {
+    await openMenu({ vendor: { ...baseProps.vendor, subtitle: "a@b.com" } });
+    expect(screen.queryByTestId("tier-badge-slot")).not.toBeInTheDocument();
+  });
+
+  it("renders tierBadge next to the vendor name in the dropdown header when both subtitle and tierBadge are set", async () => {
+    await openMenu({
+      vendor: { ...baseProps.vendor, subtitle: "a@b.com" },
+      tierBadge: <span data-testid="tier-badge-slot">Pro</span>,
+    });
+    expect(screen.getByTestId("tier-badge-slot")).toBeInTheDocument();
   });
 });
