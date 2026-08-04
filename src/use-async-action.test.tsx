@@ -56,4 +56,42 @@ describe("useAsyncAction", () => {
 
     expect(action).toHaveBeenCalledWith("a", 2);
   });
+
+  it("starts with error null/undefined", () => {
+    const { result } = renderHook(() =>
+      useAsyncAction(() => Promise.resolve()),
+    );
+    expect(result.current.error).toBeFalsy();
+  });
+
+  it("sets error when the action rejects", async () => {
+    const boom = new Error("boom");
+    const action = vi.fn(() => Promise.reject(boom));
+    const { result } = renderHook(() => useAsyncAction(action));
+
+    await act(async () => {
+      await expect(result.current.run()).rejects.toThrow("boom");
+    });
+
+    expect(result.current.error).toBe(boom);
+  });
+
+  it("clears a previous error on a subsequent successful call", async () => {
+    const action = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("boom"))
+      .mockResolvedValueOnce(undefined);
+    const { result } = renderHook(() => useAsyncAction(action));
+
+    await act(async () => {
+      await expect(result.current.run()).rejects.toThrow("boom");
+    });
+    expect(result.current.error).toBeTruthy();
+
+    await act(async () => {
+      await result.current.run();
+    });
+
+    expect(result.current.error).toBeFalsy();
+  });
 });
