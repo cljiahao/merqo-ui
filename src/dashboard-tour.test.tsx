@@ -15,6 +15,7 @@ function baseProps(
     seen: false,
     onFirstSeen: vi.fn().mockResolvedValue(undefined),
     isHomeRoute: true,
+    navigateHome: vi.fn(),
     scopeClassName: "test-tour",
     ...overrides,
   };
@@ -24,26 +25,20 @@ beforeEach(() => {
   document.head.innerHTML = "";
 });
 
-describe("DashboardTour — mount behavior", () => {
-  it("renders nothing when isHomeRoute is false", () => {
-    const { container } = render(
-      <DashboardTour {...baseProps({ isHomeRoute: false })} />,
-    );
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it("renders the floating replay button when isHomeRoute is true", async () => {
-    render(<DashboardTour {...baseProps({ seen: true })} />);
+describe("DashboardTour — button contract", () => {
+  it("renders the replay button even when isHomeRoute is false", () => {
+    render(<DashboardTour {...baseProps({ isHomeRoute: false, seen: true })} />);
     expect(
-      await screen.findByRole("button", { name: /replay tour/i }),
+      screen.getByRole("button", { name: "Replay onboarding tour" }),
     ).toBeInTheDocument();
   });
 
-  it("does not render the replay button when isHomeRoute is false, even if seen is true", () => {
-    render(<DashboardTour {...baseProps({ isHomeRoute: false, seen: true })} />);
-    expect(
-      screen.queryByRole("button", { name: /replay tour/i }),
-    ).not.toBeInTheDocument();
+  it("renders the button with the exact data-tour attribute, aria-label, and icon classes the kits expect", () => {
+    render(<DashboardTour {...baseProps({ seen: true })} />);
+    const button = screen.getByRole("button", { name: "Replay onboarding tour" });
+    expect(button).toHaveAttribute("data-tour", "tour-replay");
+    const icon = button.querySelector("svg");
+    expect(icon).toHaveClass("h-6", "w-6");
   });
 });
 
@@ -51,23 +46,305 @@ describe("DashboardTour — onFirstSeen contract", () => {
   it("does not call onFirstSeen just from mounting when seen is already true", async () => {
     const onFirstSeen = vi.fn().mockResolvedValue(undefined);
     render(<DashboardTour {...baseProps({ seen: true, onFirstSeen })} />);
-    await screen.findByRole("button", { name: /replay tour/i });
+    await screen.findByRole("button", { name: "Replay onboarding tour" });
     expect(onFirstSeen).not.toHaveBeenCalled();
+  });
+
+  it("fires onFirstSeen exactly once, immediately when an unseen auto-start begins — before driver.js has even finished loading, not from destroy/completion", async () => {
+    let resolveImport: (mod: unknown) => void = () => {};
+    const importPromise = new Promise((resolve) => {
+      resolveImport = resolve;
+    });
+    vi.doMock("driver.js", () => importPromise);
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    const onFirstSeen = vi.fn().mockResolvedValue(undefined);
+    render(
+      <FreshDashboardTour
+        {...baseProps({ seen: false, onFirstSeen })}
+      />,
+    );
+
+    // onFirstSeen must already have fired even though the lazy driver.js
+    // import is still pending — proves it's tied to tour-start, not to
+    // driver.js's onDestroyed/completion.
+    await waitFor(() => expect(onFirstSeen).toHaveBeenCalledTimes(1));
+
+    resolveImport({
+      driver: vi.fn(() => ({ drive: vi.fn(), destroy: vi.fn() })),
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(onFirstSeen).toHaveBeenCalledTimes(1);
+
+    vi.doUnmock("driver.js");
   });
 
   it("clicking replay never calls onFirstSeen for a user who has already seen the tour", async () => {
     const onFirstSeen = vi.fn().mockResolvedValue(undefined);
     render(<DashboardTour {...baseProps({ seen: true, onFirstSeen })} />);
-    const button = await screen.findByRole("button", { name: /replay tour/i });
+    const button = await screen.findByRole("button", {
+      name: "Replay onboarding tour",
+    });
     await act(async () => {
       button.click();
     });
     expect(onFirstSeen).not.toHaveBeenCalled();
   });
+
+  it("clicking replay never calls onFirstSeen for an unseen user replaying from another page", async () => {
+    const onFirstSeen = vi.fn().mockResolvedValue(undefined);
+    const navigateHome = vi.fn();
+    const { rerender } = render(
+      <DashboardTour
+        {...baseProps({
+          seen: false,
+          isHomeRoute: false,
+          onFirstSeen,
+          navigateHome,
+        })}
+      />,
+    );
+
+    const button = screen.getByRole("button", {
+      name: "Replay onboarding tour",
+    });
+    await act(async () => {
+      button.click();
+    });
+    expect(navigateHome).toHaveBeenCalledTimes(1);
+    expect(onFirstSeen).not.toHaveBeenCalled();
+
+    // Simulate the caller's navigation having landed on the home route —
+    // the pending replay resumes, still never touching onFirstSeen.
+    rerender(
+      <DashboardTour
+        {...baseProps({
+          seen: false,
+          isHomeRoute: true,
+          onFirstSeen,
+          navigateHome,
+        })}
+      />,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(onFirstSeen).not.toHaveBeenCalled();
+  });
+});
+
+describe("DashboardTour — cross-page replay", () => {
+  it("clicking replay off the home route navigates home and does not start driver.js, then starts once isHomeRoute flips true", async () => {
+    const drive = vi.fn();
+    const driverSpy = vi.fn(() => ({ drive, destroy: vi.fn() }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    const navigateHome = vi.fn();
+    const { rerender } = render(
+      <FreshDashboardTour
+        {...baseProps({ seen: true, isHomeRoute: false, navigateHome })}
+      />,
+    );
+    const button = screen.getByRole("button", {
+      name: "Replay onboarding tour",
+    });
+    await act(async () => {
+      button.click();
+    });
+
+    expect(navigateHome).toHaveBeenCalledTimes(1);
+    expect(driverSpy).not.toHaveBeenCalled();
+
+    rerender(
+      <FreshDashboardTour
+        {...baseProps({ seen: true, isHomeRoute: true, navigateHome })}
+      />,
+    );
+    await waitFor(() => expect(drive).toHaveBeenCalledTimes(1));
+
+    vi.doUnmock("driver.js");
+  });
+
+  it("clicking replay on the home route starts the tour directly, without navigating", async () => {
+    const drive = vi.fn();
+    vi.doMock("driver.js", () => ({
+      driver: vi.fn(() => ({ drive, destroy: vi.fn() })),
+    }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    const navigateHome = vi.fn();
+    render(
+      <FreshDashboardTour
+        {...baseProps({ seen: true, isHomeRoute: true, navigateHome })}
+      />,
+    );
+    const button = await screen.findByRole("button", {
+      name: "Replay onboarding tour",
+    });
+    await act(async () => {
+      button.click();
+    });
+
+    await waitFor(() => expect(drive).toHaveBeenCalledTimes(1));
+    expect(navigateHome).not.toHaveBeenCalled();
+
+    vi.doUnmock("driver.js");
+  });
+});
+
+describe("DashboardTour — re-entrancy and unmount races", () => {
+  it("clicking replay again while a tour is already live destroys the previous instance before starting a new one — no leaked instance", async () => {
+    // Proves the ground-truth #7 re-entrancy contract: `driverRef.current
+    // ?.destroy()` at the TOP of start(), before building the next
+    // instance. We drive this via two back-to-back (but sequenced) clicks
+    // rather than two literally-same-tick clicks: Vitest's SSR module
+    // mocker doesn't correctly dedupe two truly-concurrent (unresolved)
+    // dynamic import("driver.js") calls issued from a non-test-file module
+    // — the second one falls through to the REAL package instead of the
+    // mock (confirmed via isolated repro; real browsers don't have this
+    // bug, since concurrent import() of the same specifier is natively
+    // deduped to one Promise). Sequencing the clicks exercises the exact
+    // same destroy-before-build code path without hitting that harness
+    // limitation.
+    const destroy = vi.fn();
+    const driverSpy = vi.fn(() => ({ drive: vi.fn(), destroy }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    render(<FreshDashboardTour {...baseProps({ seen: true, isHomeRoute: true })} />);
+    const button = await screen.findByRole("button", {
+      name: "Replay onboarding tour",
+    });
+
+    await act(async () => {
+      button.click();
+    });
+    await waitFor(() => expect(driverSpy).toHaveBeenCalledTimes(1));
+    expect(destroy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      button.click();
+    });
+    await waitFor(() => expect(driverSpy).toHaveBeenCalledTimes(2));
+
+    // Exactly one constructed instance is left un-destroyed — never two
+    // live instances leaked.
+    expect(destroy).toHaveBeenCalledTimes(driverSpy.mock.calls.length - 1);
+
+    vi.doUnmock("driver.js");
+  });
+
+  it("does not construct or drive a driver instance if the component unmounts while the lazy import('driver.js') is still pending", async () => {
+    const importCalled = vi.fn();
+    let resolveImport: (mod: unknown) => void = () => {};
+    const importPromise = new Promise((resolve) => {
+      resolveImport = resolve;
+    });
+    const driverSpy = vi.fn(() => ({ drive: vi.fn(), destroy: vi.fn() }));
+    vi.doMock("driver.js", () => {
+      importCalled();
+      return importPromise;
+    });
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    const { unmount } = render(
+      <FreshDashboardTour {...baseProps({ seen: false, isHomeRoute: true })} />,
+    );
+
+    await waitFor(() => expect(importCalled).toHaveBeenCalled());
+
+    unmount();
+    resolveImport({ driver: driverSpy });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(driverSpy).not.toHaveBeenCalled();
+
+    vi.doUnmock("driver.js");
+  });
+});
+
+describe("DashboardTour — steps resolution", () => {
+  it("does not call a function-form steps prop just from rendering or from an off-home-route replay click", async () => {
+    const stepsSpy = vi.fn(() => STEPS);
+    vi.doMock("driver.js", () => ({
+      driver: vi.fn(() => ({ drive: vi.fn(), destroy: vi.fn() })),
+    }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    render(
+      <FreshDashboardTour
+        {...baseProps({ seen: true, isHomeRoute: false, steps: stepsSpy })}
+      />,
+    );
+    expect(stepsSpy).not.toHaveBeenCalled();
+
+    const button = screen.getByRole("button", {
+      name: "Replay onboarding tour",
+    });
+    await act(async () => {
+      button.click();
+    });
+    expect(stepsSpy).not.toHaveBeenCalled();
+
+    vi.doUnmock("driver.js");
+  });
+
+  it("resolves a function-form steps prop exactly once, at tour-start time", async () => {
+    const stepsSpy = vi.fn(() => STEPS);
+    const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
+      drive: vi.fn(),
+      destroy: vi.fn(),
+    }));
+    vi.doMock("driver.js", () => ({ driver: driverSpy }));
+    const { DashboardTour: FreshDashboardTour } = await import(
+      "./dashboard-tour"
+    );
+
+    render(
+      <FreshDashboardTour
+        {...baseProps({ seen: true, isHomeRoute: true, steps: stepsSpy })}
+      />,
+    );
+    expect(stepsSpy).not.toHaveBeenCalled();
+
+    const button = screen.getByRole("button", {
+      name: "Replay onboarding tour",
+    });
+    await act(async () => {
+      button.click();
+    });
+
+    await waitFor(() => expect(stepsSpy).toHaveBeenCalledTimes(1));
+    expect(driverSpy.mock.calls[0][0].steps).toEqual([
+      {
+        element: "[data-tour=a]",
+        popover: { title: "Step A", description: "First step" },
+      },
+      {
+        element: "[data-tour=b]",
+        popover: { title: "Step B", description: "Second step" },
+      },
+    ]);
+
+    vi.doUnmock("driver.js");
+  });
 });
 
 describe("DashboardTour — driver.js config", () => {
-  it("passes the exact shared driver.js config on every mount", async () => {
+  it("passes the exact shared driver.js config when the tour auto-starts on an unseen mount", async () => {
     const driverSpy = vi.fn((_config: Record<string, unknown>) => ({
       drive: vi.fn(),
       destroy: vi.fn(),
@@ -116,7 +393,9 @@ describe("DashboardTour — driver.js config", () => {
     );
 
     render(<FreshDashboardTour {...baseProps({ seen: true })} />);
-    const button = await screen.findByRole("button", { name: /replay tour/i });
+    const button = await screen.findByRole("button", {
+      name: "Replay onboarding tour",
+    });
     await waitFor(() => expect(driverSpy).not.toHaveBeenCalled());
 
     await act(async () => {
@@ -137,10 +416,11 @@ describe("DashboardTour — driver.js config", () => {
     vi.doUnmock("driver.js");
   });
 
-  it("destroys the driver instance on unmount", async () => {
+  it("destroys the driver instance on unmount, once it has actually started", async () => {
     const destroy = vi.fn();
+    const drive = vi.fn();
     vi.doMock("driver.js", () => ({
-      driver: vi.fn(() => ({ drive: vi.fn(), destroy })),
+      driver: vi.fn(() => ({ drive, destroy })),
     }));
     const { DashboardTour: FreshDashboardTour } = await import(
       "./dashboard-tour"
@@ -149,7 +429,7 @@ describe("DashboardTour — driver.js config", () => {
     const { unmount } = render(
       <FreshDashboardTour {...baseProps({ seen: false })} />,
     );
-    await waitFor(() => expect(destroy).not.toHaveBeenCalled());
+    await waitFor(() => expect(drive).toHaveBeenCalledTimes(1));
 
     unmount();
     expect(destroy).toHaveBeenCalledTimes(1);
@@ -189,6 +469,22 @@ describe("DashboardTour — injected popover CSS", () => {
     const css = document.getElementById("merqo-tour-styles")?.textContent ?? "";
     expect(css).toContain(".test-tour");
     expect(css).toContain(".second-tour");
+  });
+
+  it("does not false-positive its dedup check when scopeClassName is a substring of an internal driver.js class name", () => {
+    // Regression test: the old dedup check matched the bare `.${scopeClassName} {`
+    // substring, which is also present inside every scope's
+    // `.driver-popover-title` rule — a scope literally named
+    // "driver-popover-title" would never get its own top-level rule under
+    // the old check. Matching the FULL scoped selector fixes this.
+    render(<DashboardTour {...baseProps({ seen: true })} />);
+    render(
+      <DashboardTour
+        {...baseProps({ seen: true, scopeClassName: "driver-popover-title" })}
+      />,
+    );
+    const css = document.getElementById("merqo-tour-styles")?.textContent ?? "";
+    expect(css).toContain(".driver-popover.driver-popover-title {");
   });
 });
 
