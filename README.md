@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.8.0"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.9.0"
 }
 ```
 
@@ -191,7 +191,16 @@ works locally.
   `data-tour` on each nav link; optional `isActiveHref?: (href) => boolean`
   applies the cross-kit default active styling — a primary-tinted pill —
   and `aria-current="page"` — both injected, since this package has no
-  router dependency of its own.
+  router dependency of its own. The header's inner row is capped at
+  `max-w-7xl`/centered (since v0.9.0) to match the content area every kit
+  renders below it — a kit rendering wider content below the nav will look
+  misaligned again unless its own `<main>` also caps at `max-w-7xl`.
+- `LandingNav` — public-page nav shell: sticky header, shared shape
+  (`z-20`, `bg-background/85`, padding on the header not the inner `<nav>`),
+  `max-w-6xl` centered row. Takes only two slots — `wordmark: ReactNode`
+  and `end: ReactNode` — so each kit keeps full control of its own
+  wordmark markup and right-side links/CTAs (copy and hrefs are legitimate
+  per-kit content, not something this package should standardize).
 - `ProfileForm` — the full profile/settings page composition (stall/shop
   name → photo → password | display name → social links), each section
   independently saved. Never calls a backend directly — every mutation is
