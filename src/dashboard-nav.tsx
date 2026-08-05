@@ -36,7 +36,7 @@ export function DashboardNav({
 
   return (
     <header className="border-border bg-background/85 sticky top-0 z-20 border-b px-5 py-3.5 backdrop-blur-md">
-      <div className="flex items-center justify-between">
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             type="button"
