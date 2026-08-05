@@ -15,12 +15,32 @@ const distIndexPath = path.resolve(
 );
 const distExists = existsSync(distIndexPath);
 
+const distDtsPath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../dist/index.d.ts",
+);
+const distDtsExists = existsSync(distDtsPath);
+
 describe("build output", () => {
   it.skipIf(!distExists)(
     'dist/index.js starts with "use client" (regression guard: esbuild strips bare directives when bundling multiple modules into one file - see tsup.config.ts banner)',
     () => {
       const contents = readFileSync(distIndexPath, "utf-8");
       expect(contents.startsWith('"use client";')).toBe(true);
+    },
+  );
+
+  it.skipIf(!distDtsExists)(
+    "every sibling module dist/index.d.ts re-exports from actually exists (regression guard: a Linux-only rollup-plugin-dts failure once left dist/index.d.ts pointing at sibling .d.ts files that were never emitted, silently degrading every @merqo/ui import to `any` in consumers - see tsup.config.ts's dts:false comment)",
+    () => {
+      const contents = readFileSync(distDtsPath, "utf-8");
+      const distDir = path.dirname(distDtsPath);
+      const specifiers = [...contents.matchAll(/from ["'](\.[^"']+)["']/g)].map((m) => m[1]);
+      expect(specifiers.length).toBeGreaterThan(0);
+      for (const specifier of specifiers) {
+        const resolved = path.resolve(distDir, `${specifier}.d.ts`);
+        expect(existsSync(resolved), `${specifier}.d.ts (from index.d.ts) is missing`).toBe(true);
+      }
     },
   );
 
