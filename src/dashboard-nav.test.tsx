@@ -1,3 +1,4 @@
+import type { AnchorHTMLAttributes } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -169,5 +170,36 @@ describe("DashboardNav", () => {
     );
     const link = screen.getByRole("link", { name: "Home" });
     expect(link).not.toHaveClass("bg-primary/10");
+  });
+
+  it("renders nav links (desktop and mobile) through a given LinkComponent instead of a plain <a>", async () => {
+    const user = userEvent.setup();
+    const CustomLink = ({ href, children, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+      <a href={href} data-custom-link="true" {...rest}>
+        {children}
+      </a>
+    );
+    render(
+      <DashboardNav
+        {...baseProps}
+        navLinks={[{ href: "/dashboard", label: "Home" }]}
+        LinkComponent={CustomLink}
+      />,
+    );
+    for (const link of screen.getAllByRole("link", { name: "Home" })) {
+      expect(link).toHaveAttribute("data-custom-link", "true");
+    }
+
+    await user.click(screen.getByRole("button", { name: "Mobile navigation menu" }));
+    const nav = screen.getByRole("navigation", { name: "Mobile navigation menu" });
+    expect(within(nav).getByRole("link", { name: "Home" })).toHaveAttribute(
+      "data-custom-link",
+      "true",
+    );
+  });
+
+  it("defaults to a plain <a> when LinkComponent is not given", () => {
+    render(<DashboardNav {...baseProps} navLinks={[{ href: "/dashboard", label: "Home" }]} />);
+    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("data-custom-link");
   });
 });

@@ -6,23 +6,41 @@ import { Menu } from "lucide-react";
 import { AccountMenu, type AccountMenuProps } from "./account-menu";
 import { cn } from "./lib/utils";
 
+export type DashboardNavLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string;
+};
+
 export type DashboardNavProps = {
   wordmark: React.ReactNode;
   navLinks: { href: string; label: string }[];
   isActiveHref?: (href: string) => boolean;
   tourAnchor?: (href: string) => string;
+  /**
+   * Component used to render each nav link — defaults to a plain `<a>` so
+   * this package stays framework-agnostic. Next.js consumers should pass
+   * `next/link`'s `Link` here: a plain `<a>` forces a full page reload on
+   * every nav click, which can abort any in-flight client-side write
+   * (e.g. an unawaited "mark seen" call) started just before the click.
+   */
+  LinkComponent?: React.ComponentType<DashboardNavLinkProps>;
 } & AccountMenuProps;
 
 const MOBILE_PANEL_ID = "dashboard-nav-mobile-panel";
+
+function DefaultLink({ href, ...rest }: DashboardNavLinkProps) {
+  return <a href={href} {...rest} />;
+}
 
 export function DashboardNav({
   wordmark,
   navLinks,
   isActiveHref,
   tourAnchor,
+  LinkComponent,
   ...accountMenuProps
 }: DashboardNavProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const Link = LinkComponent ?? DefaultLink;
 
   // I7: Escape closes the mobile panel, matching the tap-away scrim below.
   React.useEffect(() => {
@@ -52,7 +70,7 @@ export function DashboardNav({
           {wordmark}
           <nav className="hidden items-center gap-4 sm:flex">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 data-tour={tourAnchor ? tourAnchor(link.href) : undefined}
@@ -64,11 +82,11 @@ export function DashboardNav({
                 )}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
-        <AccountMenu {...accountMenuProps} />
+        <AccountMenu {...accountMenuProps} LinkComponent={LinkComponent} />
       </div>
 
       {mobileOpen ? (
@@ -88,7 +106,7 @@ export function DashboardNav({
             className="border-border bg-background absolute inset-x-0 top-full z-20 flex flex-col gap-1 border-b p-3 sm:hidden"
           >
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 data-tour={tourAnchor ? tourAnchor(link.href) : undefined}
@@ -102,7 +120,7 @@ export function DashboardNav({
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </>

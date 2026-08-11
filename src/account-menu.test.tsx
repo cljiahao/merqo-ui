@@ -1,3 +1,4 @@
+import type { AnchorHTMLAttributes } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -344,5 +345,48 @@ describe("AccountMenu", () => {
       tierBadge: <span data-testid="tier-badge-slot">Pro</span>,
     });
     expect(screen.getByTestId("tier-badge-slot")).toBeInTheDocument();
+  });
+
+  it("renders Profile/Plan/extraLink through a given LinkComponent instead of a plain <a>", async () => {
+    const CustomLink = ({
+      href,
+      children,
+      ...rest
+    }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+      <a href={href} data-custom-link="true" {...rest}>
+        {children}
+      </a>
+    );
+    await openMenu({
+      extraLink: { href: "/admin", label: "Admin" },
+      LinkComponent: CustomLink,
+    });
+    expect(
+      await screen.findByRole("menuitem", { name: /profile/i }),
+    ).toHaveAttribute("data-custom-link", "true");
+    expect(screen.getByRole("menuitem", { name: /^plan/i })).toHaveAttribute(
+      "data-custom-link",
+      "true",
+    );
+    expect(screen.getByRole("menuitem", { name: "Admin" })).toHaveAttribute(
+      "data-custom-link",
+      "true",
+    );
+  });
+
+  it("keeps the mailto Get help item a plain <a> even when LinkComponent is given", async () => {
+    const CustomLink = ({
+      href,
+      children,
+      ...rest
+    }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+      <a href={href} data-custom-link="true" {...rest}>
+        {children}
+      </a>
+    );
+    await openMenu({ LinkComponent: CustomLink });
+    expect(
+      await screen.findByRole("menuitem", { name: /get help/i }),
+    ).not.toHaveAttribute("data-custom-link");
   });
 });

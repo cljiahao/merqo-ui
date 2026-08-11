@@ -28,6 +28,10 @@ export type AccountMenuGetHelp =
     }
   | { type: "submenu"; items: { label: string; href: string }[] };
 
+export type AccountMenuLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string;
+};
+
 export interface AccountMenuProps {
   vendor: { name: string; avatarUrl?: string; tier?: string; subtitle?: string };
   signOutAction: () => Promise<void>;
@@ -46,6 +50,15 @@ export interface AccountMenuProps {
   extraLink?: { href: string; label: string };
   /** Optional slot rendered next to the vendor name in the dropdown header (only shown when vendor.subtitle is also set). */
   tierBadge?: React.ReactNode;
+  /**
+   * Component used to render internal menu links (Profile/Settings/Plan/
+   * help submenu items/extraLink) — defaults to a plain `<a>` so this
+   * package stays framework-agnostic. Next.js consumers should pass
+   * `next/link`'s `Link` here to avoid a full page reload on click. The
+   * `mailto:` "Get help" item always stays a plain `<a>` — it never
+   * navigates the page, so there's nothing to fix there.
+   */
+  LinkComponent?: React.ComponentType<AccountMenuLinkProps>;
 }
 
 function toErrorMessage(error: unknown): string {
@@ -62,6 +75,10 @@ function initials(name: string): string {
   if (parts.length === 0) return "•";
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function DefaultLink({ href, ...rest }: AccountMenuLinkProps) {
+  return <a href={href} {...rest} />;
 }
 
 function AvatarInitial({ name, avatarUrl }: { name: string; avatarUrl?: string }) {
@@ -94,10 +111,12 @@ export function AccountMenu({
   onError,
   extraLink,
   tierBadge,
+  LinkComponent,
 }: AccountMenuProps) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [feedbackOpen, setFeedbackOpen] = React.useState(false);
   const [helpOpen, setHelpOpen] = React.useState(false);
+  const Link = LinkComponent ?? DefaultLink;
 
   // C2 fix: sign-out used to be `void signOutAction()` - a rejection was
   // discarded, the menu closed regardless, and the user had no way to know
@@ -146,20 +165,20 @@ export function AccountMenu({
             </>
           )}
           <DropdownMenuItem asChild>
-            <a href="/dashboard/profile">Profile</a>
+            <Link href="/dashboard/profile">Profile</Link>
           </DropdownMenuItem>
 
           {kitLocalSettingsHref ? (
             <DropdownMenuItem asChild>
-              <a href={kitLocalSettingsHref}>Settings</a>
+              <Link href={kitLocalSettingsHref}>Settings</Link>
             </DropdownMenuItem>
           ) : null}
 
           {showPlanItem ? (
             <DropdownMenuItem asChild>
-              <a href="/dashboard/plan">
+              <Link href="/dashboard/plan">
                 Plan{vendor.tier ? ` · ${vendor.tier}` : ""}
-              </a>
+              </Link>
             </DropdownMenuItem>
           ) : null}
 
@@ -177,7 +196,7 @@ export function AccountMenu({
               <DropdownMenuSubContent>
                 {getHelp.items.map((item) => (
                   <DropdownMenuItem key={item.href} asChild>
-                    <a href={item.href}>{item.label}</a>
+                    <Link href={item.href}>{item.label}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuSubContent>
@@ -190,7 +209,7 @@ export function AccountMenu({
 
           {extraLink ? (
             <DropdownMenuItem asChild>
-              <a href={extraLink.href}>{extraLink.label}</a>
+              <Link href={extraLink.href}>{extraLink.label}</Link>
             </DropdownMenuItem>
           ) : null}
 

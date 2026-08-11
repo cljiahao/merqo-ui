@@ -185,8 +185,17 @@ works locally.
   `tierBadge?: ReactNode` renders next to the vendor name in the dropdown
   header (only when `vendor.subtitle` is also set). The trigger always
   carries `data-tour="nav-account"` for `DashboardTour` step targeting.
+  Optional `LinkComponent?: React.ComponentType<{href: string, ...}>` (since
+  v0.10.0) renders Profile/Settings/Plan/help-submenu-items/`extraLink`
+  through it instead of a plain `<a>` — pass `next/link`'s `Link` in a
+  Next.js kit to avoid a full page reload on click, which can abort any
+  in-flight fire-and-forget write (e.g. a "mark seen" call) started just
+  before the click. Defaults to a plain `<a>` so the package stays
+  framework-agnostic. The `mailto:` "Get help" item is always a plain
+  `<a>` regardless — it never navigates the page, so there's nothing to fix.
 - `DashboardNav` — the full sticky-topbar shell (burger-left/avatar-right
-  at every viewport). Composes `AccountMenu`. The burger always carries
+  at every viewport). Composes `AccountMenu`, forwarding its own
+  `LinkComponent` prop down to it. The burger always carries
   `data-tour="nav-menu"`. Optional `tourAnchor?: (href) => string` stamps
   `data-tour` on each nav link; optional `isActiveHref?: (href) => boolean`
   applies the cross-kit default active styling — a primary-tinted pill —
@@ -195,6 +204,9 @@ works locally.
   `max-w-7xl`/centered (since v0.9.0) to match the content area every kit
   renders below it — a kit rendering wider content below the nav will look
   misaligned again unless its own `<main>` also caps at `max-w-7xl`.
+  Optional `LinkComponent?: React.ComponentType<{href: string, ...}>` (since
+  v0.10.0) renders each nav link (desktop and mobile) through it instead of
+  a plain `<a>` — same rationale as `AccountMenu`'s prop above.
 - `LandingNav` — public-page nav shell: sticky header, shared shape
   (`z-20`, `bg-background/85`, padding on the header not the inner `<nav>`),
   `max-w-6xl` centered row. Takes only two slots — `wordmark: ReactNode`
