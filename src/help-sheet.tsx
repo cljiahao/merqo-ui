@@ -154,7 +154,7 @@ function HelpForm({
           </p>
         ) : null}
       </div>
-      <SheetFooter className="p-0">
+      <SheetFooter className="px-0 pb-4">
         <button
           type="submit"
           disabled={pending}
