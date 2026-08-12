@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.9.0"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.10.1"
 }
 ```
 
