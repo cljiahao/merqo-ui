@@ -249,6 +249,35 @@ works locally.
   migrated kit can delete its own `tour.css` entirely. Popover base class is
   the generic `"tour-popover"`, not kit-specific.
 
+## Z-index scale
+
+This package has no shared z-index token or constant — each component picks
+its layer independently, following one implicit ladder. Documenting it here
+so a consuming kit knows where its own page-level overlays should land
+relative to these, without having to grep every component's className:
+
+- **`z-10`** — `DashboardNav`'s mobile-menu tap-away scrim (the dimming
+  backdrop behind the open mobile nav panel).
+- **`z-20`** — sticky header shells: `DashboardNav`'s and `LandingNav`'s
+  `<header>`, and `DashboardNav`'s mobile nav panel itself (which must sit
+  above its own `z-10` scrim, and above normal page content scrolling
+  beneath the sticky header).
+- **`z-40`** — `DashboardTour`'s floating replay button (`fixed`,
+  bottom-right on every page) — above normal content and the sticky nav,
+  but below any modal-style overlay so a tour replay never traps focus
+  above an open sheet/dropdown/popover.
+- **`z-50`** — the transient overlay layer: `ui/dropdown-menu.tsx`,
+  `ui/sheet.tsx`, `ui/popover.tsx`, `ui/tooltip.tsx`. These are the
+  topmost layer in the package because they're all short-lived,
+  user-triggered overlays that must never be occluded by anything else
+  this package renders.
+
+A kit adding its own overlay (a toast stack, a global modal, etc.) should
+pick a value based on where in this ladder it belongs — e.g. above `z-50`
+for something that must outrank an open Sheet/Popover, between `z-20` and
+`z-40` for a page-level banner that shouldn't cover the tour's replay
+button, etc.
+
 ## Usage
 
 ```tsx

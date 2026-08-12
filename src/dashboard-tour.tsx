@@ -40,11 +40,25 @@ export interface DashboardTourProps {
    *  This package has no Next.js/router dependency, so navigation itself
    *  is always the caller's responsibility. */
   navigateHome: () => void;
-  /** Kit-specific CSS scope for the popover style override, e.g.
-   *  "loopkit-tour". Keeps each kit's tour visually branded without this
-   *  package knowing about any kit's palette. */
-  scopeClassName: string;
+  /**
+   * CSS scope class used to key the injected `<style>` block's dedup guard
+   * (see `ensureScopedStyles`) — NOT a branding hook. `popoverCss()` themes
+   * entirely via CSS vars (`--popover`, `--primary`, etc.), so nothing
+   * kit-specific actually flows through this class; every kit renders
+   * identically styled popovers regardless of what it's set to. Optional —
+   * defaults to a package-internal constant. Only pass your own value if
+   * you need multiple distinct `DashboardTour` instances mounted in the
+   * same document to each get their own dedup-guarded style rule (they
+   * don't need visually distinct rules, since there's nothing kit-specific
+   * to vary — see above).
+   */
+  scopeClassName?: string;
 }
+
+// Stable default used when a caller omits `scopeClassName`. See the prop's
+// doc comment above: this only needs to be unique enough to key the
+// style-tag dedup guard, not brand-specific.
+const DEFAULT_SCOPE_CLASS_NAME = "merqo-ui-tour";
 
 interface DriverInstance {
   drive: () => void;
@@ -85,6 +99,11 @@ function popoverCss(scopeClassName: string): string {
   color: var(--popover-foreground);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  /* Literal black, not a theme token — intentional: drop shadows are
+     conventionally black regardless of brand color, matching every other
+     shadow in this package's own shadcn primitives (shadow-md/shadow-lg
+     utility classes also resolve to a black-based shadow). Not an
+     oversight to "fix" by swapping in --foreground or similar. */
   box-shadow:
     0 10px 30px -12px rgb(0 0 0 / 0.35),
     0 2px 8px -4px rgb(0 0 0 / 0.2);
@@ -180,7 +199,7 @@ export function DashboardTour({
   onFirstSeen,
   isHomeRoute,
   navigateHome,
-  scopeClassName,
+  scopeClassName = DEFAULT_SCOPE_CLASS_NAME,
 }: DashboardTourProps) {
   const driverRef = React.useRef<DriverInstance | null>(null);
   const seenAtMountRef = React.useRef(seen);

@@ -4,6 +4,7 @@ import * as React from "react";
 import { z } from "zod";
 import { AtSign, Globe, Image as ImageIcon, KeyRound, Store, User } from "lucide-react";
 
+import { AsyncSubmitButton } from "./async-submit-button";
 import { Section } from "./section";
 import { TwoColumnSections } from "./two-column-sections";
 import { useAsyncAction } from "./use-async-action";
@@ -94,18 +95,6 @@ function toErrorMessage(error: unknown): string {
 function FieldError({ message }: { message: string | null }) {
   if (!message) return null;
   return <p className="text-destructive text-sm">{message}</p>;
-}
-
-function SaveButton({ pending, children }: { pending: boolean; children: React.ReactNode }) {
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 w-fit items-center justify-center rounded-md px-4 text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
-    >
-      {children}
-    </button>
-  );
 }
 
 export function ProfileForm({
@@ -212,9 +201,9 @@ export function ProfileForm({
           <FieldError
             message={stallNameSave.error ? toErrorMessage(stallNameSave.error) : null}
           />
-          <SaveButton pending={stallNameSave.pending}>
+          <AsyncSubmitButton pending={stallNameSave.pending} className="w-fit">
             Save {stallNameLabel.toLowerCase()}
-          </SaveButton>
+          </AsyncSubmitButton>
         </form>
       </Section>
 
@@ -276,7 +265,9 @@ export function ProfileForm({
           <FieldError
             message={passwordSave.error ? toErrorMessage(passwordSave.error) : null}
           />
-          <SaveButton pending={passwordSave.pending}>Save password</SaveButton>
+          <AsyncSubmitButton pending={passwordSave.pending} className="w-fit">
+            Save password
+          </AsyncSubmitButton>
         </form>
       </Section>
     </>
@@ -315,7 +306,9 @@ export function ProfileForm({
           <FieldError
             message={displayNameSave.error ? toErrorMessage(displayNameSave.error) : null}
           />
-          <SaveButton pending={displayNameSave.pending}>Save display name</SaveButton>
+          <AsyncSubmitButton pending={displayNameSave.pending} className="w-fit">
+            Save display name
+          </AsyncSubmitButton>
         </form>
       </Section>
 
@@ -376,7 +369,9 @@ export function ProfileForm({
           <FieldError
             message={socialLinksSave.error ? toErrorMessage(socialLinksSave.error) : null}
           />
-          <SaveButton pending={socialLinksSave.pending}>Save social links</SaveButton>
+          <AsyncSubmitButton pending={socialLinksSave.pending} className="w-fit">
+            Save social links
+          </AsyncSubmitButton>
         </form>
       </Section>
     </>

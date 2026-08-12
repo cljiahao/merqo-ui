@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { AsyncSubmitButton } from "./async-submit-button";
 import { useAsyncAction } from "./use-async-action";
 import {
   Sheet,
@@ -139,13 +140,9 @@ export function FeedbackSheet({
             ) : null}
           </div>
           <SheetFooter className="px-0 pb-4">
-            <button
-              type="submit"
-              disabled={pending}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
-            >
+            <AsyncSubmitButton pending={pending} pendingChildren="Sending…" className="py-2">
               Send
-            </button>
+            </AsyncSubmitButton>
           </SheetFooter>
         </form>
       </SheetContent>

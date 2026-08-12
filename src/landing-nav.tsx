@@ -11,6 +11,11 @@ export type LandingNavProps = {
 // position, z-index, background opacity, and where padding lives.
 export function LandingNav({ wordmark, end }: LandingNavProps) {
   return (
+    // Same sticky-header shape as DashboardNav (border/bg/blur/z-index) —
+    // but `py-4` (vs DashboardNav's `py-3.5`) and `max-w-6xl` (vs
+    // DashboardNav's `max-w-7xl`) are a deliberate per-surface difference,
+    // not drift: this header has no account-menu/burger row to keep dense,
+    // and public pages' content columns are narrower than the dashboard's.
     <header className="border-border bg-background/85 sticky top-0 z-20 border-b px-5 py-4 backdrop-blur-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between">
         {wordmark}

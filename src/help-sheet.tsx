@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { AsyncSubmitButton } from "./async-submit-button";
 import { useAsyncAction } from "./use-async-action";
 import {
   Sheet,
@@ -126,7 +127,7 @@ function HelpForm({
                 role="radio"
                 aria-checked={category === c.value}
                 onClick={() => setCategory(c.value)}
-                className={`flex items-center justify-center rounded-md border px-2 py-2 text-sm font-medium transition-colors ${
+                className={`flex items-center justify-center rounded-md border px-2 py-2 text-sm font-medium tabular-nums transition-colors ${
                   category === c.value
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-input text-muted-foreground hover:border-primary/50"
@@ -155,13 +156,9 @@ function HelpForm({
         ) : null}
       </div>
       <SheetFooter className="px-0 pb-4">
-        <button
-          type="submit"
-          disabled={pending}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
-        >
+        <AsyncSubmitButton pending={pending} pendingChildren="Sending…" className="py-2">
           Send
-        </button>
+        </AsyncSubmitButton>
       </SheetFooter>
     </form>
   );
