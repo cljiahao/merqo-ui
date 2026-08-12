@@ -122,6 +122,28 @@ describe("HelpSheet", () => {
     });
   });
 
+  it("form mode: arrow keys move focus and selection between category pills", async () => {
+    const user = userEvent.setup();
+    render(
+      <HelpSheet
+        open
+        onOpenChange={() => {}}
+        mode="form"
+        onSubmit={vi.fn()}
+        categories={[
+          { value: "vendor_access", label: "Vendor access" },
+          { value: "billing", label: "Billing" },
+        ]}
+      />,
+    );
+
+    screen.getByRole("radio", { name: "Vendor access" }).focus();
+    await user.keyboard("{ArrowRight}");
+
+    expect(screen.getByRole("radio", { name: "Billing" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "Billing" })).toHaveFocus();
+  });
+
   it("form mode: uses the default title/description when none are given", () => {
     render(<HelpSheet open onOpenChange={() => {}} mode="form" onSubmit={vi.fn()} />);
     expect(screen.getByText("Get help")).toBeInTheDocument();

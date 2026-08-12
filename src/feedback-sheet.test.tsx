@@ -171,6 +171,19 @@ describe("FeedbackSheet", () => {
     });
   });
 
+  it("showNps: arrow keys move focus and selection between score pills", async () => {
+    const user = userEvent.setup();
+    render(
+      <FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} showNps />,
+    );
+
+    screen.getByRole("radio", { name: "0" }).focus();
+    await user.keyboard("{ArrowRight}");
+
+    expect(screen.getByRole("radio", { name: "1" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "1" })).toHaveFocus();
+  });
+
   it("uses the default title/description when none are given", () => {
     render(<FeedbackSheet open onOpenChange={() => {}} onSubmit={vi.fn()} />);
     expect(screen.getByText("Feedback")).toBeInTheDocument();

@@ -196,6 +196,7 @@ export function ProfileForm({
             id="profile-stall-name"
             value={stallName}
             onChange={(event) => setStallName(event.target.value)}
+            autoComplete="organization"
           />
           <FieldError message={stallNameValidationError} />
           <FieldError
@@ -260,6 +261,7 @@ export function ProfileForm({
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            autoComplete="new-password"
           />
           <FieldError message={passwordValidationError} />
           <FieldError
@@ -301,6 +303,7 @@ export function ProfileForm({
             id="profile-display-name"
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}
+            autoComplete="name"
           />
           <FieldError message={displayNameValidationError} />
           <FieldError
@@ -349,6 +352,7 @@ export function ProfileForm({
             onChange={(event) =>
               setSocialLinks((links) => ({ ...links, website: event.target.value }))
             }
+            autoComplete="url"
           />
           <Label htmlFor="profile-facebook">Facebook</Label>
           <Input

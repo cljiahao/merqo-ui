@@ -169,7 +169,12 @@ works locally.
   `categories?: {value, label}[]` to add a category radiogroup above the
   message field (an empty array behaves like no categories at all). Both
   take optional `title?`/`description?` overrides (each kit's own copy) —
-  omit either for this package's own defaults.
+  omit either for this package's own defaults. Both pill grids share an
+  internal `PillRadioGroup` implementing the full WAI-ARIA "radio group"
+  keyboard pattern — only the checked pill (or the first, before anything's
+  checked) is a Tab stop; Left/Right/Up/Down move focus and selection
+  between pills, wrapping at the ends, and Home/End jump to the first/last
+  pill.
 - `AccountMenu` — the avatar dropdown alone (Profile, optional kit-local
   settings, optional Plan, Get help, Feedback, Sign out — always last,
   separated, destructive-styled). Reusable without the full nav shell. The
@@ -228,6 +233,12 @@ works locally.
   matching `ImageUploader`'s own props; `onSaveAvatar` now receives the
   uploaded `string | null` URL, not a raw `File`. `SocialLinks` now has all
   4 fields every kit uses: `website`, `instagram`, `facebook`, `tiktok`.
+  The stall-name, display-name, password, and website inputs carry
+  `autocomplete` hints (`organization`/`name`/`new-password`/`url`) so
+  password managers and browser autofill identify each field's purpose
+  (WCAG 1.3.5) instead of guessing — most consequentially for the password
+  field, where a missing `new-password` hint can make a browser offer
+  autofill for the vendor's *current* password into a change-password form.
 - `ImageUploader` — square (`thumb`) or wide (`banner`) image upload control
   with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
   step, and an injected storage write (`onUpload`) so the package stays

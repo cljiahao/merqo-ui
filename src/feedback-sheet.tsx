@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { AsyncSubmitButton } from "./async-submit-button";
+import { PillRadioGroup } from "./pill-radio-group";
 import { useAsyncAction } from "./use-async-action";
 import {
   Sheet,
@@ -90,32 +91,21 @@ export function FeedbackSheet({
         >
           {showNps && (
             <div className="flex flex-col gap-2">
-              <div
-                role="radiogroup"
-                aria-label="Recommend score, 0 to 10"
-                className="grid grid-cols-11 gap-1"
-              >
-                {Array.from({ length: 11 }, (_, i) => i).map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    role="radio"
-                    aria-checked={score === n}
-                    aria-label={String(n)}
-                    onClick={() => {
-                      setScore(n);
-                      setNpsValidationError(false);
-                    }}
-                    className={`flex items-center justify-center rounded-md border px-2 py-2 text-sm font-medium tabular-nums transition-colors ${
-                      score === n
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input text-muted-foreground hover:border-primary/50"
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
+              <PillRadioGroup
+                ariaLabel="Recommend score, 0 to 10"
+                gridClassName="grid-cols-11 gap-1"
+                optionClassName="tabular-nums"
+                value={score === null ? null : String(score)}
+                onChange={(v) => {
+                  setScore(Number(v));
+                  setNpsValidationError(false);
+                }}
+                options={Array.from({ length: 11 }, (_, i) => ({
+                  value: String(i),
+                  label: i,
+                  ariaLabel: String(i),
+                }))}
+              />
               {npsValidationError && (
                 <p className="text-destructive text-sm" role="alert">
                   Pick a score first
