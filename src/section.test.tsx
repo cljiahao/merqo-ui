@@ -159,4 +159,21 @@ describe("Section", () => {
     );
     expect(container.querySelector("section")).toBeInTheDocument();
   });
+
+  it("wrapper: still keeps a gap between header and children even though the default section shell (and its own gap-4) is bypassed", () => {
+    const { container } = render(
+      <Section
+        icon={<span />}
+        title="Stall name"
+        wrapper={(content) => <article data-testid="custom-shell">{content}</article>}
+      >
+        <p>content</p>
+      </Section>,
+    );
+    const shell = screen.getByTestId("custom-shell");
+    expect(shell.firstElementChild).toHaveClass("flex", "flex-col", "gap-4");
+    expect(container.querySelector("header")?.parentElement).toBe(
+      shell.firstElementChild,
+    );
+  });
 });

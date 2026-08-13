@@ -326,6 +326,37 @@ describe("AccountMenu", () => {
     }
   });
 
+  it("renders a leading icon on every standard item (Profile, Settings, Plan, Get help, Feedback, Sign out)", async () => {
+    await openMenu({ kitLocalSettingsHref: "/dashboard/settings" });
+    for (const name of [
+      /profile/i,
+      /settings/i,
+      /plan/i,
+      /get help/i,
+      /feedback/i,
+      /sign out/i,
+    ]) {
+      const item = screen.getByRole("menuitem", { name });
+      expect(item.querySelector("svg")).toBeInTheDocument();
+    }
+  });
+
+  it("renders a leading icon on the Get help sub-trigger in 'submenu' mode", async () => {
+    const user = await openMenu({
+      getHelp: {
+        type: "submenu",
+        items: [{ label: "FAQ", href: "/help/faq" }],
+      },
+    });
+    const subTrigger = screen.getByText(/get help/i).closest('[data-slot="dropdown-menu-sub-trigger"]');
+    expect(subTrigger?.querySelector("svg")).toBeInTheDocument();
+    // sub-content items (FAQ) are consumer-supplied labels, not restyled with a fixed icon
+    await user.click(screen.getByText(/get help/i));
+    expect(
+      (await screen.findByRole("menuitem", { name: "FAQ" })).querySelector("svg"),
+    ).not.toBeInTheDocument();
+  });
+
   it("stamps data-tour=\"nav-account\" on the trigger button", () => {
     render(<AccountMenu {...baseProps} />);
     expect(screen.getByRole("button", { name: /account menu/i })).toHaveAttribute(

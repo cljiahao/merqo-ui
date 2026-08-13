@@ -1,6 +1,14 @@
 "use client";
 
 import * as React from "react";
+import {
+  CreditCard,
+  HelpCircle,
+  LogOut,
+  MessageSquarePlus,
+  Settings as SettingsIcon,
+  User as UserIcon,
+} from "lucide-react";
 
 import { FeedbackSheet, type FeedbackData } from "./feedback-sheet";
 import { HelpSheet, type SupportRequest } from "./help-sheet";
@@ -165,18 +173,25 @@ export function AccountMenu({
             </>
           )}
           <DropdownMenuItem asChild>
-            <Link href="/dashboard/profile">Profile</Link>
+            <Link href="/dashboard/profile">
+              <UserIcon className="size-4" />
+              Profile
+            </Link>
           </DropdownMenuItem>
 
           {kitLocalSettingsHref ? (
             <DropdownMenuItem asChild>
-              <Link href={kitLocalSettingsHref}>Settings</Link>
+              <Link href={kitLocalSettingsHref}>
+                <SettingsIcon className="size-4" />
+                Settings
+              </Link>
             </DropdownMenuItem>
           ) : null}
 
           {showPlanItem ? (
             <DropdownMenuItem asChild>
               <Link href="/dashboard/plan">
+                <CreditCard className="size-4" />
                 Plan{vendor.tier ? ` · ${vendor.tier}` : ""}
               </Link>
             </DropdownMenuItem>
@@ -184,15 +199,24 @@ export function AccountMenu({
 
           {getHelp.type === "mailto" ? (
             <DropdownMenuItem asChild>
-              <a href={`mailto:${getHelp.address}`}>Get help</a>
+              <a href={`mailto:${getHelp.address}`}>
+                <HelpCircle className="size-4" />
+                Get help
+              </a>
             </DropdownMenuItem>
           ) : getHelp.type === "drawer" || getHelp.type === "form" ? (
             <DropdownMenuItem onSelect={() => setHelpOpen(true)}>
+              <HelpCircle className="size-4" />
               Get help
             </DropdownMenuItem>
           ) : (
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger>Get help</DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger>
+                <span className="flex items-center gap-2">
+                  <HelpCircle className="size-4" />
+                  Get help
+                </span>
+              </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 {getHelp.items.map((item) => (
                   <DropdownMenuItem key={item.href} asChild>
@@ -204,6 +228,7 @@ export function AccountMenu({
           )}
 
           <DropdownMenuItem onSelect={() => setFeedbackOpen(true)}>
+            <MessageSquarePlus className="size-4" />
             Feedback
           </DropdownMenuItem>
 
@@ -227,6 +252,7 @@ export function AccountMenu({
                 .catch((err) => onError?.(err));
             }}
           >
+            <LogOut className="size-4" />
             {signOut.pending ? "Signing out…" : "Sign out"}
           </DropdownMenuItem>
           {signOut.error ? (
