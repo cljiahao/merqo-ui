@@ -35,7 +35,11 @@ export function Section({
   children,
 }: SectionProps) {
   const content = (
-    <>
+    // flex flex-col gap-4 lives here, not just on the default <section> shell
+    // below, so a `wrapper` swap-out (which owns its own outer classes) can't
+    // silently drop the gap between the header and children — it did exactly
+    // that in qkit's Ticket-wrapped usage before this was moved down.
+    <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <span className="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-full">
@@ -60,7 +64,7 @@ export function Section({
         ) : null}
       </header>
       <div className="flex flex-col gap-4">{children}</div>
-    </>
+    </div>
   );
 
   if (wrapper) {
