@@ -58,6 +58,14 @@ describe("ProfileForm", () => {
     expect(socialLinksIndex).toBeGreaterThan(displayNameIndex);
   });
 
+  it("sets autocomplete hints so password managers/browser autofill identify each field's purpose (WCAG 1.3.5)", () => {
+    render(<ProfileForm {...makeProps()} />);
+    expect(screen.getByLabelText("Stall name")).toHaveAttribute("autocomplete", "organization");
+    expect(screen.getByLabelText("Display name")).toHaveAttribute("autocomplete", "name");
+    expect(screen.getByLabelText("New password")).toHaveAttribute("autocomplete", "new-password");
+    expect(screen.getByLabelText("Website")).toHaveAttribute("autocomplete", "url");
+  });
+
   it("uses a custom stallNameLabel when provided", () => {
     render(<ProfileForm {...makeProps({ stallNameLabel: "Shop name" })} />);
     expect(screen.getByRole("heading", { name: "Shop name" })).toBeInTheDocument();

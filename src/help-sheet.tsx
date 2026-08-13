@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+import { AsyncSubmitButton } from "./async-submit-button";
+import { PillRadioGroup } from "./pill-radio-group";
 import { useAsyncAction } from "./use-async-action";
 import {
   Sheet,
@@ -114,28 +116,13 @@ function HelpForm({
     >
       {categories && categories.length > 0 && (
         <div className="flex flex-col gap-2">
-          <div
-            role="radiogroup"
-            aria-label="What's it about?"
-            className="grid grid-cols-2 gap-1.5"
-          >
-            {categories.map((c) => (
-              <button
-                key={c.value}
-                type="button"
-                role="radio"
-                aria-checked={category === c.value}
-                onClick={() => setCategory(c.value)}
-                className={`flex items-center justify-center rounded-md border px-2 py-2 text-sm font-medium transition-colors ${
-                  category === c.value
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-input text-muted-foreground hover:border-primary/50"
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
+          <PillRadioGroup
+            ariaLabel="What's it about?"
+            gridClassName="grid-cols-2 gap-1.5"
+            value={category ?? null}
+            onChange={setCategory}
+            options={categories.map((c) => ({ value: c.value, label: c.label }))}
+          />
         </div>
       )}
       <div className="flex flex-1 flex-col gap-2">
@@ -155,13 +142,9 @@ function HelpForm({
         ) : null}
       </div>
       <SheetFooter className="px-0 pb-4">
-        <button
-          type="submit"
-          disabled={pending}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
-        >
+        <AsyncSubmitButton pending={pending} pendingChildren="Sending…" className="py-2">
           Send
-        </button>
+        </AsyncSubmitButton>
       </SheetFooter>
     </form>
   );

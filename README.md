@@ -169,7 +169,12 @@ works locally.
   `categories?: {value, label}[]` to add a category radiogroup above the
   message field (an empty array behaves like no categories at all). Both
   take optional `title?`/`description?` overrides (each kit's own copy) —
-  omit either for this package's own defaults.
+  omit either for this package's own defaults. Both pill grids share an
+  internal `PillRadioGroup` implementing the full WAI-ARIA "radio group"
+  keyboard pattern — only the checked pill (or the first, before anything's
+  checked) is a Tab stop; Left/Right/Up/Down move focus and selection
+  between pills, wrapping at the ends, and Home/End jump to the first/last
+  pill.
 - `AccountMenu` — the avatar dropdown alone (Profile, optional kit-local
   settings, optional Plan, Get help, Feedback, Sign out — always last,
   separated, destructive-styled). Reusable without the full nav shell. The
@@ -228,6 +233,12 @@ works locally.
   matching `ImageUploader`'s own props; `onSaveAvatar` now receives the
   uploaded `string | null` URL, not a raw `File`. `SocialLinks` now has all
   4 fields every kit uses: `website`, `instagram`, `facebook`, `tiktok`.
+  The stall-name, display-name, password, and website inputs carry
+  `autocomplete` hints (`organization`/`name`/`new-password`/`url`) so
+  password managers and browser autofill identify each field's purpose
+  (WCAG 1.3.5) instead of guessing — most consequentially for the password
+  field, where a missing `new-password` hint can make a browser offer
+  autofill for the vendor's *current* password into a change-password form.
 - `ImageUploader` — square (`thumb`) or wide (`banner`) image upload control
   with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
   step, and an injected storage write (`onUpload`) so the package stays
@@ -248,6 +259,35 @@ works locally.
   progress-text, close/prev/next buttons, 4-directional arrow tinting) — a
   migrated kit can delete its own `tour.css` entirely. Popover base class is
   the generic `"tour-popover"`, not kit-specific.
+
+## Z-index scale
+
+This package has no shared z-index token or constant — each component picks
+its layer independently, following one implicit ladder. Documenting it here
+so a consuming kit knows where its own page-level overlays should land
+relative to these, without having to grep every component's className:
+
+- **`z-10`** — `DashboardNav`'s mobile-menu tap-away scrim (the dimming
+  backdrop behind the open mobile nav panel).
+- **`z-20`** — sticky header shells: `DashboardNav`'s and `LandingNav`'s
+  `<header>`, and `DashboardNav`'s mobile nav panel itself (which must sit
+  above its own `z-10` scrim, and above normal page content scrolling
+  beneath the sticky header).
+- **`z-40`** — `DashboardTour`'s floating replay button (`fixed`,
+  bottom-right on every page) — above normal content and the sticky nav,
+  but below any modal-style overlay so a tour replay never traps focus
+  above an open sheet/dropdown/popover.
+- **`z-50`** — the transient overlay layer: `ui/dropdown-menu.tsx`,
+  `ui/sheet.tsx`, `ui/popover.tsx`, `ui/tooltip.tsx`. These are the
+  topmost layer in the package because they're all short-lived,
+  user-triggered overlays that must never be occluded by anything else
+  this package renders.
+
+A kit adding its own overlay (a toast stack, a global modal, etc.) should
+pick a value based on where in this ladder it belongs — e.g. above `z-50`
+for something that must outrank an open Sheet/Popover, between `z-20` and
+`z-40` for a page-level banner that shouldn't cover the tour's replay
+button, etc.
 
 ## Usage
 

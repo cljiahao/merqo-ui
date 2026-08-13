@@ -53,6 +53,12 @@ export function DashboardNav({
   }, [mobileOpen]);
 
   return (
+    // Sticky-header shell intentionally shares its shape (border/bg/blur/
+    // z-index) with LandingNav's header below — but `py-3.5` (vs LandingNav's
+    // `py-4`) and `max-w-7xl` (vs LandingNav's `max-w-6xl`) are a deliberate
+    // per-surface difference, not drift: this nav's row is denser (it also
+    // carries the account menu) and its max-width matches the dashboard
+    // content area's own `max-w-7xl` cap (see this component's README entry).
     <header className="border-border bg-background/85 sticky top-0 z-20 border-b px-5 py-3.5 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <div className="flex items-center gap-4">
