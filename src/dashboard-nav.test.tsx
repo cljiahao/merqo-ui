@@ -26,6 +26,20 @@ beforeEach(() => {
 });
 
 describe("DashboardNav", () => {
+  it("passes switchKits through to the account menu's Switch products submenu", async () => {
+    const user = userEvent.setup();
+    render(
+      <DashboardNav
+        {...baseProps}
+        switchKits={[{ label: "loopkit", href: "https://loopkit-sg.vercel.app" }]}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: /account menu/i }));
+    await user.click(await screen.findByText(/switch products/i));
+    const loopkit = await screen.findByRole("menuitem", { name: "loopkit" });
+    expect(loopkit).toHaveAttribute("href", "https://loopkit-sg.vercel.app");
+  });
+
   it("renders the wordmark", () => {
     render(<DashboardNav {...baseProps} />);
     expect(screen.getByText("QKit")).toBeInTheDocument();

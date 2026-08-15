@@ -111,6 +111,44 @@ describe("AccountMenu", () => {
     expect(contact).toHaveAttribute("href", "/help/contact");
   });
 
+  it("renders a Switch products submenu with the given kits as links", async () => {
+    const user = await openMenu({
+      switchKits: [
+        { label: "loopkit", href: "https://loopkit-sg.vercel.app" },
+        { label: "paykit", href: "https://paykit-sg.vercel.app" },
+      ],
+    });
+    const subTrigger = await screen.findByText(/switch products/i);
+    await user.click(subTrigger);
+
+    const loopkit = await screen.findByRole("menuitem", { name: "loopkit" });
+    expect(loopkit).toHaveAttribute("href", "https://loopkit-sg.vercel.app");
+    const paykit = await screen.findByRole("menuitem", { name: "paykit" });
+    expect(paykit).toHaveAttribute("href", "https://paykit-sg.vercel.app");
+  });
+
+  it("keeps switch-kit links plain <a> even when LinkComponent is given", async () => {
+    function MockLink({ href, children }: AnchorHTMLAttributes<HTMLAnchorElement>) {
+      return (
+        <a href={href} data-mock-link="true">
+          {children}
+        </a>
+      );
+    }
+    const user = await openMenu({
+      LinkComponent: MockLink,
+      switchKits: [{ label: "loopkit", href: "https://loopkit-sg.vercel.app" }],
+    });
+    await user.click(await screen.findByText(/switch products/i));
+    const loopkit = await screen.findByRole("menuitem", { name: "loopkit" });
+    expect(loopkit).not.toHaveAttribute("data-mock-link");
+  });
+
+  it("renders no Switch products entry when switchKits is omitted or empty", async () => {
+    await openMenu();
+    expect(screen.queryByText(/switch products/i)).not.toBeInTheDocument();
+  });
+
   it("clicking Feedback opens the FeedbackSheet", async () => {
     const user = await openMenu();
     await user.click(await screen.findByRole("menuitem", { name: /feedback/i }));
