@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   CreditCard,
   HelpCircle,
+  LayoutGrid,
   LogOut,
   MessageSquarePlus,
   Settings as SettingsIcon,
@@ -58,6 +59,13 @@ export interface AccountMenuProps {
   extraLink?: { href: string; label: string };
   /** Optional slot rendered next to the vendor name in the dropdown header (only shown when vendor.subtitle is also set). */
   tierBadge?: React.ReactNode;
+  /** Other kits in the Merqo family this vendor can switch to — SSO
+   * already signs them in everywhere, this just adds the navigation.
+   * Rendered as a "Switch products" submenu at the top of the menu.
+   * Omit or pass an empty array to hide the entry entirely. Links are
+   * always plain `<a>` regardless of `LinkComponent` — they navigate to
+   * a different kit's own deployment, not an in-app route. */
+  switchKits?: { label: string; href: string }[];
   /**
    * Component used to render internal menu links (Profile/Settings/Plan/
    * help submenu items/extraLink) — defaults to a plain `<a>` so this
@@ -119,6 +127,7 @@ export function AccountMenu({
   onError,
   extraLink,
   tierBadge,
+  switchKits,
   LinkComponent,
 }: AccountMenuProps) {
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -172,6 +181,27 @@ export function AccountMenu({
               <DropdownMenuSeparator />
             </>
           )}
+          {switchKits && switchKits.length > 0 ? (
+            <>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <span className="flex items-center gap-2">
+                    <LayoutGrid className="size-4" />
+                    Switch products
+                  </span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {switchKits.map((kit) => (
+                    <DropdownMenuItem key={kit.href} asChild>
+                      <a href={kit.href}>{kit.label}</a>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+            </>
+          ) : null}
+
           <DropdownMenuItem asChild>
             <Link href="/dashboard/profile">
               <UserIcon className="size-4" />
