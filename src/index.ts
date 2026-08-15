@@ -31,5 +31,7 @@ export type {
 } from "./image-uploader";
 export { DashboardTour } from "./dashboard-tour";
 export type { DashboardTourProps, TourStep } from "./dashboard-tour";
+export { KIT_FAMILY, getSwitchKits } from "./kit-family";
+export type { KitFamilyMember } from "./kit-family";
 export { PricingForm } from "./pricing-form";
 export type { PricingFormProps, PricingFormInitial, PricingFieldConfig } from "./pricing-form";
