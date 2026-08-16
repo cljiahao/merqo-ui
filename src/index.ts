@@ -37,3 +37,9 @@ export { PricingForm } from "./pricing-form";
 export type { PricingFormProps, PricingFormInitial, PricingFieldConfig } from "./pricing-form";
 export { VendorTelegramSection } from "./vendor-telegram-section";
 export type { VendorTelegramSectionProps } from "./vendor-telegram-section";
+export { PlanComparisonTable } from "./plan-comparison-table";
+export type {
+  PlanComparisonTableProps,
+  PlanComparisonTier,
+  PlanComparisonRow,
+} from "./plan-comparison-table";
