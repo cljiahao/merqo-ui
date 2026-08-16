@@ -10,7 +10,7 @@ describe("KIT_FAMILY", () => {
       "stockkit",
     ]);
     for (const kit of KIT_FAMILY) {
-      expect(kit.url).toMatch(/^https:\/\/[a-z]+-sg\.vercel\.app$/);
+      expect(kit.url).toMatch(/^https:\/\/[a-z]+\.merqo\.io$/);
     }
   });
 });
