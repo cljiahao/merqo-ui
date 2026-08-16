@@ -272,6 +272,16 @@ works locally.
   the package's own conventions. Named apart from any kit's own
   customer-facing Telegram-connect component — this one is vendor-scoped
   and standing, never single-use.
+- `PlanComparisonTable` — the free/paid-tier feature-comparison grid shared
+  across kits' `/dashboard/plan` pages. `tiers: {key, label}[]` (any
+  length — column count is computed, never hardcoded to 2 or 3) and
+  `rows: {label, values: Record<string, boolean | string>}[]` (`values`
+  keyed by each tier's `key`). A boolean cell renders a check icon
+  (`true`) or a muted dash (`false`); a string cell (e.g. `"1"`/`"∞"`)
+  renders as plain centered text. The column grid uses a computed
+  `gridTemplateColumns` inline style, not a Tailwind arbitrary-value
+  class, so the layout can't be silently dropped by a consuming app's own
+  JIT purge.
 
 ## Z-index scale
 
