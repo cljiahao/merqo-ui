@@ -1,11 +1,13 @@
 /**
  * The Merqo kit family, one place — adding a new live kit means updating
- * this list, not every kit's own DashboardNav wrapper. Mirrors the URL
- * convention `merqo/src/lib/kits.ts` already establishes
- * (`https://{slug}-sg.vercel.app`), duplicated here deliberately: this
- * package has no dependency on any single kit's app code, and the URL
- * shape is a stable, external contract (each kit's own Vercel deployment
- * name), not an implementation detail likely to drift silently.
+ * this list, not every kit's own DashboardNav wrapper. Each kit's real
+ * production host is its `<slug>.merqo.io` subdomain (matching
+ * `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.merqo.io`'s shared-session scope) —
+ * NOT its `-sg.vercel.app` deployment name, which is a different host and
+ * so never receives the shared SSO cookie. This package has no dependency
+ * on any single kit's app code, so these are hardcoded rather than read
+ * from a per-kit env var: the URL shape is a stable, external contract,
+ * not an implementation detail likely to drift silently.
  */
 export interface KitFamilyMember {
   slug: string;
@@ -14,10 +16,10 @@ export interface KitFamilyMember {
 }
 
 export const KIT_FAMILY: KitFamilyMember[] = [
-  { slug: "qkit", name: "qkit", url: "https://qkit-sg.vercel.app" },
-  { slug: "loopkit", name: "loopkit", url: "https://loopkit-sg.vercel.app" },
-  { slug: "paykit", name: "paykit", url: "https://paykit-sg.vercel.app" },
-  { slug: "stockkit", name: "stockkit", url: "https://stockkit-sg.vercel.app" },
+  { slug: "qkit", name: "qkit", url: "https://qkit.merqo.io" },
+  { slug: "loopkit", name: "loopkit", url: "https://loopkit.merqo.io" },
+  { slug: "paykit", name: "paykit", url: "https://paykit.merqo.io" },
+  { slug: "stockkit", name: "stockkit", url: "https://stockkit.merqo.io" },
 ];
 
 /**
