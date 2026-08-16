@@ -259,6 +259,19 @@ works locally.
   progress-text, close/prev/next buttons, 4-directional arrow tinting) — a
   migrated kit can delete its own `tour.css` entirely. Popover base class is
   the generic `"tour-popover"`, not kit-specific.
+- `VendorTelegramSection` — vendor-facing Telegram connect settings block
+  (Phase A2 of the cross-kit Telegram integration design), the shared
+  replacement for each kit's own now-retired per-kit vendor-alert bot's
+  settings UI. `connected: false` renders a "Connect Telegram" action that
+  calls the injected `onConnect` (mints a fresh deep-link token on demand,
+  e.g. via a server action — no token is pre-minted on page load) and then
+  shows the returned `deepLink` + `qrSvgMarkup`; `connected: true` shows a
+  connected status and a "Disconnect" action calling the injected
+  `onDisconnect`. Optional `onError?: (error: unknown) => void` and
+  `sectionWrapper?` (forwarded to its internal `Section`) match the rest of
+  the package's own conventions. Named apart from any kit's own
+  customer-facing Telegram-connect component — this one is vendor-scoped
+  and standing, never single-use.
 
 ## Z-index scale
 

@@ -35,3 +35,5 @@ export { KIT_FAMILY, getSwitchKits } from "./kit-family";
 export type { KitFamilyMember } from "./kit-family";
 export { PricingForm } from "./pricing-form";
 export type { PricingFormProps, PricingFormInitial, PricingFieldConfig } from "./pricing-form";
+export { VendorTelegramSection } from "./vendor-telegram-section";
+export type { VendorTelegramSectionProps } from "./vendor-telegram-section";
