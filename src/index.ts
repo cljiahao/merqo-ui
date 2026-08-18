@@ -43,3 +43,5 @@ export type {
   PlanComparisonTier,
   PlanComparisonRow,
 } from "./plan-comparison-table";
+export { AuditLogTable } from "./audit-log-table";
+export type { AuditLogTableProps, AuditLogEntry } from "./audit-log-table";
