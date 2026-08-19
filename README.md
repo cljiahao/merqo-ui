@@ -282,6 +282,20 @@ works locally.
   `gridTemplateColumns` inline style, not a Tailwind arbitrary-value
   class, so the layout can't be silently dropped by a consuming app's own
   JIT purge.
+- `AuditLogTable` — renders a list of audit/activity entries
+  (`{id, actor, action, target?, detail?, createdAt}`) as a bordered
+  row list: action (with `detail` as a secondary line when present),
+  actor, target (an em dash when omitted), and a right-aligned
+  timestamp. `actor` is expected to already be a resolved display
+  string (an email, a name) — this package has no auth/DB dependency,
+  so resolving an `admin_id` to a human-readable actor is the caller's
+  job, same as `ImageUploader`'s injected `onUpload`. Optional
+  `formatAction?: (action: string) => string` maps a raw action string
+  (e.g. `"set_vendor_plan"`) to a human label — omit it to render the
+  raw string as-is. Optional `dateFormatter?: (date: Date) => string`
+  overrides the default `Intl.DateTimeFormat` rendering. Optional
+  `emptyState?: ReactNode` replaces the default "No activity recorded
+  yet." message for a zero-row list.
 
 ## Z-index scale
 
@@ -311,6 +325,80 @@ pick a value based on where in this ladder it belongs — e.g. above `z-50`
 for something that must outrank an open Sheet/Popover, between `z-20` and
 `z-40` for a page-level banner that shouldn't cover the tour's replay
 button, etc.
+
+## Audit trail standard
+
+Not a shared library — each kit owns its own Supabase schema and writes its
+own migration, same as everywhere else in the family (no cross-schema
+queries, no shared server code). This section documents the *shape* every
+kit's audit trail should follow, the same way the Z-index scale above
+documents a convention without shipping a shared constant. Written here
+(2026-08-18) after a ground-truth check found the pattern already exists,
+independently, in all four live kits (qkit, loopkit, paykit, stockkit) —
+same table shape, copied kit-to-kit, but drifting in coverage. This section
+exists so the next kit that adds or extends its audit trail copies the
+same target, not whatever the most recently-read kit happened to do.
+
+**Table shape** — one `admin_audit` table per kit's own schema:
+
+```sql
+create table <schema>.admin_audit (
+  id         uuid primary key default gen_random_uuid(),
+  admin_id   uuid not null references auth.users(id),
+  action     text not null,
+  target_id  uuid,
+  detail     jsonb,
+  created_at timestamptz not null default now()
+);
+create index admin_audit_created_idx on <schema>.admin_audit (created_at desc);
+```
+
+RLS: admins may `select`; no `insert`/`update`/`delete` policy for anyone —
+writes only happen through the service-role client, same as the rest of
+each kit's admin surface.
+
+**Write path** — a small `recordAudit()` helper (paykit's
+`src/app/admin/actions.ts` is the reference implementation) that inserts a
+row and swallows its own failure: the action being recorded must never fail
+*because* logging it failed, but a logging failure should still surface in
+server logs so a broken trail doesn't go unnoticed.
+
+**Coverage** — log every mutating action a vendor or an admin could
+plausibly need to reconstruct or dispute later (plan changes, pricing
+changes, refunds, payment confirmations, cancellations, redemptions), not
+only today's `/admin`-route actions. A cross-kit write initiated by merqo
+on a vendor's behalf (e.g. a hub-triggered plan override) should also land
+a row in the *target* kit's own `admin_audit`, attributed to the merqo
+system actor — never a silent service-role bypass.
+
+**Domain ledgers count too** — a kit's own append-only domain data (e.g.
+`loopkit.stamp_events`, `paykit.transactions`, `stockkit.stock_movements`)
+already serves as a vendor-facing audit trail for that kit's core activity
+and doesn't need to be duplicated into `admin_audit`. A kit whose core
+mutable state has no such ledger (e.g. qkit's `orders.order_status`, a
+single column overwritten on every transition, no history) should add one
+before calling its own audit story complete.
+
+**Immutability** — `admin_audit` and any domain ledger should be
+append-only in practice, not just by convention: nothing today stops the
+service-role client itself from editing or deleting a row. A kit relying on
+its audit trail for a real dispute should add a DB-level guard (revoke
+`update`/`delete` from the relevant role, or a rejecting trigger) rather
+than assume application code alone won't touch it later.
+
+**Retention** — state a retention window explicitly in the kit's own
+`AGENTS.md` (5 years is the reference point — Singapore's IRAS record-
+keeping norm for a small business) rather than growing the table forever
+with no stated policy.
+
+**Built (2026-08-19):** `AuditLogTable` (see Components below) — a
+shared render component, same class as `PlanComparisonTable`/
+`VendorTelegramSection` (renders rows uniformly, each kit passes its own
+data, no backend coupling inside the package), so a vendor-facing
+"Activity" view can look the same across kits without each one
+hand-rolling its own table. A kit can adopt it today; nothing forces
+that before its own `admin_audit` coverage above is real — the
+component just renders whatever rows it's given.
 
 ## Usage
 
