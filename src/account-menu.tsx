@@ -7,9 +7,13 @@ import {
   LayoutGrid,
   LogOut,
   MessageSquarePlus,
+  Monitor,
+  Moon,
   Settings as SettingsIcon,
+  Sun,
   User as UserIcon,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 
 import { FeedbackSheet, type FeedbackData } from "./feedback-sheet";
 import { HelpSheet, type SupportRequest } from "./help-sheet";
@@ -19,6 +23,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -142,6 +148,7 @@ export function AccountMenu({
   // closes on a *successful* sign-out; on failure it stays open with a
   // visible inline error next to the item.
   const signOut = useAsyncAction(signOutAction);
+  const { theme, setTheme } = useTheme();
 
   return (
     <>
@@ -267,6 +274,26 @@ export function AccountMenu({
               <Link href={extraLink.href}>{extraLink.label}</Link>
             </DropdownMenuItem>
           ) : null}
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">
+            Theme
+          </DropdownMenuLabel>
+          <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+            <DropdownMenuRadioItem value="light">
+              <Sun className="size-4" />
+              Light
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark">
+              <Moon className="size-4" />
+              Dark
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="system">
+              <Monitor className="size-4" />
+              System
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
 
           <DropdownMenuSeparator />
 

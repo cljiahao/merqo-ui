@@ -2,6 +2,7 @@ import type { AnchorHTMLAttributes } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ThemeProvider } from "next-themes";
 import { AccountMenu } from "./account-menu";
 
 const signOutAction = vi.fn().mockResolvedValue(undefined);
@@ -183,6 +184,28 @@ describe("AccountMenu", () => {
 
     await user.click(signOut);
     await waitFor(() => expect(signOutAction).toHaveBeenCalled());
+  });
+
+  it("renders a Theme section with Light/Dark/System options", async () => {
+    await openMenu();
+
+    expect(screen.getByText(/^theme$/i)).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: /light/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: /dark/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: /system/i })).toBeInTheDocument();
+  });
+
+  it("selecting Dark applies the .dark class via next-themes", async () => {
+    const user = userEvent.setup();
+    render(
+      <ThemeProvider attribute="class">
+        <AccountMenu {...baseProps} />
+      </ThemeProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: /account menu/i }));
+    await user.click(await screen.findByRole("menuitemradio", { name: /dark/i }));
+
+    await waitFor(() => expect(document.documentElement).toHaveClass("dark"));
   });
 
   it("C2: a failed sign-out surfaces a visible inline error and keeps the menu open", async () => {
