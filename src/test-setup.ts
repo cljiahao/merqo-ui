@@ -22,6 +22,20 @@ if (!window.ResizeObserver) {
   window.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 }
 
+if (!window.matchMedia) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }) as unknown as MediaQueryList;
+}
+
 // jsdom doesn't implement real navigation — clicking a genuine <a href> in a
 // test (e.g. asserting a nav link's href, then clicking it to check a panel
 // closes) logs "Not implemented: navigation" to the virtual console. Tests
