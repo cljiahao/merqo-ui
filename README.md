@@ -200,15 +200,14 @@ works locally.
   `<a>` regardless — it never navigates the page, so there's nothing to fix.
   Since v0.18.0, a Light/Dark/System theme control (`next-themes`' own
   `useTheme`) sits above Sign out, replacing any kit-local theme toggle —
-  the one home for theme switching across the whole kit family. It's a
-  flat `DropdownMenuRadioGroup`, not a nested submenu: a Radix
-  `RadioItem` nested inside a `Sub` doesn't register clicks under jsdom
-  (confirmed via an isolated repro, not just this component), so this
-  stays flat both for reliability and because it needs no drill-down for
-  three options. Consuming apps must wrap their root layout in
-  `next-themes`' own `<ThemeProvider attribute="class">` — without it,
-  `useTheme()` still renders safely (no crash), but `setTheme` is a no-op
-  and the control does nothing.
+  the one home for theme switching across the whole kit family. Since
+  v0.19.0 it's a `DropdownMenuSub` (trigger reads "Theme · {current}"),
+  matching the "Switch products"/"Get help" submenu pattern, so the menu
+  shows one row instead of three always-expanded options. Consuming apps
+  must wrap their root layout in `next-themes`' own
+  `<ThemeProvider attribute="class">` — without it, `useTheme()` still
+  renders safely (no crash), but `setTheme` is a no-op and the control does
+  nothing.
 - `DashboardNav` — the full sticky-topbar shell (burger-left/avatar-right
   at every viewport). Composes `AccountMenu`, forwarding its own
   `LinkComponent` prop down to it. The burger always carries

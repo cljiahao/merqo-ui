@@ -149,6 +149,10 @@ export function AccountMenu({
   // visible inline error next to the item.
   const signOut = useAsyncAction(signOutAction);
   const { theme, setTheme } = useTheme();
+  const themeLabel =
+    theme === "light" ? "Light" : theme === "dark" ? "Dark" : "System";
+  const ThemeIcon =
+    theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
 
   return (
     <>
@@ -277,23 +281,30 @@ export function AccountMenu({
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">
-            Theme
-          </DropdownMenuLabel>
-          <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-            <DropdownMenuRadioItem value="light">
-              <Sun className="size-4" />
-              Light
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="dark">
-              <Moon className="size-4" />
-              Dark
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="system">
-              <Monitor className="size-4" />
-              System
-            </DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <span className="flex items-center gap-2">
+                <ThemeIcon className="size-4" />
+                Theme · {themeLabel}
+              </span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                <DropdownMenuRadioItem value="light">
+                  <Sun className="size-4" />
+                  Light
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="dark">
+                  <Moon className="size-4" />
+                  Dark
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="system">
+                  <Monitor className="size-4" />
+                  System
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
 
           <DropdownMenuSeparator />
 

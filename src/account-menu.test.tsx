@@ -1,6 +1,6 @@
 import type { AnchorHTMLAttributes } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "next-themes";
 import { AccountMenu } from "./account-menu";
@@ -186,11 +186,16 @@ describe("AccountMenu", () => {
     await waitFor(() => expect(signOutAction).toHaveBeenCalled());
   });
 
-  it("renders a Theme section with Light/Dark/System options", async () => {
-    await openMenu();
+  it("renders a Theme submenu trigger showing the current theme, collapsed until opened", async () => {
+    const user = await openMenu();
 
-    expect(screen.getByText(/^theme$/i)).toBeInTheDocument();
-    expect(screen.getByRole("menuitemradio", { name: /light/i })).toBeInTheDocument();
+    const subTrigger = screen.getByText(/^theme ·/i);
+    expect(subTrigger).toBeInTheDocument();
+    expect(screen.queryByRole("menuitemradio", { name: /light/i })).not.toBeInTheDocument();
+
+    await user.click(subTrigger);
+
+    expect(await screen.findByRole("menuitemradio", { name: /light/i })).toBeInTheDocument();
     expect(screen.getByRole("menuitemradio", { name: /dark/i })).toBeInTheDocument();
     expect(screen.getByRole("menuitemradio", { name: /system/i })).toBeInTheDocument();
   });
@@ -203,7 +208,11 @@ describe("AccountMenu", () => {
       </ThemeProvider>,
     );
     await user.click(screen.getByRole("button", { name: /account menu/i }));
-    await user.click(await screen.findByRole("menuitemradio", { name: /dark/i }));
+    await user.click(await screen.findByText(/^theme ·/i));
+    // fireEvent, not userEvent: userEvent's realistic hover simulation loses
+    // Radix's highlight state on a radio item nested inside a submenu (a
+    // jsdom-specific quirk) — a direct click event selects it reliably.
+    fireEvent.click(await screen.findByRole("menuitemradio", { name: /dark/i }));
 
     await waitFor(() => expect(document.documentElement).toHaveClass("dark"));
   });
