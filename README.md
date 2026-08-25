@@ -306,6 +306,21 @@ works locally.
   overrides the default `Intl.DateTimeFormat` rendering. Optional
   `emptyState?: ReactNode` replaces the default "No activity recorded
   yet." message for a zero-row list.
+- `StatTile` / `DeltaPill` — the label/value/delta content shared by every
+  kit's stats strip. Deliberately ships with no outer card shell (border/
+  background/padding/hover treatment) — three real kit implementations were
+  compared and their outer wrapping diverged too much to unify; each caller
+  wraps `StatTile` in its own container. `reverse?: boolean` swaps the
+  default label-above-value order for value-above-label. `valueClassName?`/
+  `captionClassName?` let a caller pick mono/display/plain instead of a
+  fixed font. `delta?: number | null` renders the standard `DeltaPill`;
+  `deltaSlot?: ReactNode` renders arbitrary content in the same slot instead
+  (a breakdown-popover trigger, an icon) — mutually exclusive with `delta`.
+  `valueTrailing?: ReactNode` renders content beside the value itself, for a
+  richer indicator (e.g. a 3-state trend) that doesn't fit `DeltaPill`'s
+  2-state up/down contract. `DeltaPill` itself takes `size?: "xs" | "sm"`
+  and `downClassName?` since real kits don't share identical pill sizing or
+  down-state color — only the up-state emerald is fixed across the family.
 
 ## Z-index scale
 
