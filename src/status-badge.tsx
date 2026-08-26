@@ -1,3 +1,4 @@
+import * as React from "react";
 import { cn } from "./lib/utils";
 
 export interface StatusBadgeConfig {
@@ -19,7 +20,10 @@ export interface StatusBadgeProps<T extends string> {
  * hoc. Deliberately not a `Badge` wrapper — this shape carries its own
  * treatment (dot, border, tint, tracking) that `Badge`'s variants don't offer.
  */
-export function StatusBadge<T extends string>({ status, config }: StatusBadgeProps<T>) {
+export function StatusBadge<T extends string>({
+  status,
+  config,
+}: StatusBadgeProps<T>): React.JSX.Element {
   const { label, className } = config[status];
   return (
     <span
