@@ -49,3 +49,5 @@ export { StatTile, DeltaPill } from "./stat-tile";
 export type { StatTileProps, DeltaPillProps } from "./stat-tile";
 export { StatusBadge } from "./status-badge";
 export type { StatusBadgeProps, StatusBadgeConfig } from "./status-badge";
+export { DataTable } from "./data-table";
+export type { DataTableProps, DataTableColumn } from "./data-table";
