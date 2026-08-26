@@ -330,6 +330,16 @@ works locally.
   over printkit's/paykit's plain shadcn `Badge` uses, since qkit's was the
   one built on real semantic status tokens rather than raw Tailwind
   literals mixed in ad hoc.
+- `DataTable<T>({rows, columns, getRowKey, emptyState?})` — the
+  rows-of-columns table shell shared across kits' transaction/booking/job-
+  history/vendor-list tables. Self-contained plain `<table>` + Tailwind
+  (not a wrapper over each consumer's own shadcn `Table`), styled to match
+  shadcn/ui's own `Table` primitives exactly, so it carries no cross-
+  package import-path dependency — same reasoning as `AuditLogTable`.
+  `columns: DataTableColumn<T>[]` (`{header, cell, className?}`) is
+  caller-supplied, so this component owns only the table shell, never the
+  domain columns. Deliberately not extended to kanban/card-grid list views
+  (e.g. qkit's order board) — those are a genuinely different shape.
 
 ## Z-index scale
 
