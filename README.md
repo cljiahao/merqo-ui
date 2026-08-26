@@ -321,6 +321,15 @@ works locally.
   2-state up/down contract. `DeltaPill` itself takes `size?: "xs" | "sm"`
   and `downClassName?` since real kits don't share identical pill sizing or
   down-state color — only the up-state emerald is fixed across the family.
+- `StatusBadge<T>({status, config})` — the dot + uppercase-tracked
+  bordered-pill status chip shared across kits. `config: Record<T,
+  {label, className}>` is caller-supplied (same "caller supplies the map"
+  contract `AuditLogTable`'s `formatAction` established), so each kit keeps
+  its own status set and colors — only the rendering shape (dot, border,
+  tint, tracking) is shared. Extracted from qkit's original implementation
+  over printkit's/paykit's plain shadcn `Badge` uses, since qkit's was the
+  one built on real semantic status tokens rather than raw Tailwind
+  literals mixed in ad hoc.
 
 ## Z-index scale
 

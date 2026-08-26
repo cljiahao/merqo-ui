@@ -47,3 +47,5 @@ export { AuditLogTable } from "./audit-log-table";
 export type { AuditLogTableProps, AuditLogEntry } from "./audit-log-table";
 export { StatTile, DeltaPill } from "./stat-tile";
 export type { StatTileProps, DeltaPillProps } from "./stat-tile";
+export { StatusBadge } from "./status-badge";
+export type { StatusBadgeProps, StatusBadgeConfig } from "./status-badge";
