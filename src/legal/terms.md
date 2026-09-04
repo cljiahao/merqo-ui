@@ -1,7 +1,5 @@
 # Merqo Vendor Terms of Service
 
-**Status: DRAFT — pending legal review. Not yet in effect.**
-
 These Vendor Terms of Service ("Terms") govern a business's ("Vendor",
 "you", "your") use of any Merqo kit (qkit, loopkit, paykit, stockkit,
 printkit, and any other product Merqo launches under the Merqo name, each a
