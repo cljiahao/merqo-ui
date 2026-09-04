@@ -29,4 +29,10 @@ export default defineConfig({
   banner: {
     js: '"use client";',
   },
+  esbuildOptions(options) {
+    options.loader = {
+      ...options.loader,
+      ".md": "text",
+    };
+  },
 });
