@@ -24,10 +24,21 @@ function slugify(text: string): string {
     .replace(/\s+/g, "-");
 }
 
+export function getNodeText(node: React.ReactNode): string {
+  if (node === null || node === undefined || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(getNodeText).join("");
+  if (React.isValidElement(node)) {
+    const props = node.props as { children?: React.ReactNode };
+    return getNodeText(props.children);
+  }
+  return "";
+}
+
 function headingRenderer(level: 2 | 3) {
   const Tag = level === 2 ? "h2" : "h3";
   return ({ children }: { children?: React.ReactNode }) => {
-    const text = React.Children.toArray(children).join("");
+    const text = getNodeText(children);
     return (
       <Tag
         id={slugify(text)}
