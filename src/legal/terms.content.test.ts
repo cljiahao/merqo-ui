@@ -14,10 +14,12 @@ const REQUIRED_HEADINGS = [
   "## Your account",
   "## Fees and billing",
   "## Refunds and cancellation",
+  "## Our intellectual property",
   "## Your content and intellectual property",
   "## Data protection",
   "## Security incident notification",
   "## Vendor indemnity",
+  "## Service availability",
   "## Our liability to you",
   "## Confidentiality",
   "## Force majeure",
@@ -34,8 +36,12 @@ describe("terms.md", () => {
 
   it("names Merqo's contracting party, pre-ACRA", () => {
     expect(source).toContain(
-      "Lee Jia Hao Clarence, trading as Merqo (sole proprietorship — ACRA registration pending)",
+      "Lee Jia Hao Clarence, trading as Merqo (sole proprietorship, ACRA registration pending)",
     );
+  });
+
+  it("contains no em dash", () => {
+    expect(source).not.toMatch(/—/);
   });
 
   it("does not contain a blanket liability exclusion", () => {

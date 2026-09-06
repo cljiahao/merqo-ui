@@ -8,9 +8,9 @@ you agree to these Terms on behalf of the business you represent.
 
 ## Who we are
 
-Merqo is operated by Lee Jia Hao Clarence, trading as Merqo (sole proprietorship — ACRA registration pending) ("Merqo", "we", "us", "our").
-Merqo is a family of small-business software tools — queueing, loyalty,
-payments, inventory, and print-routing kits — built for small and
+Merqo is operated by Lee Jia Hao Clarence, trading as Merqo (sole proprietorship, ACRA registration pending) ("Merqo", "we", "us", "our").
+Merqo is a family of small-business software tools (queueing, loyalty,
+payments, inventory, and print-routing kits) built for small and
 medium-sized businesses in Singapore. Merqo's registered business form is
 in progress: we have applied, or intend to apply, for ACRA registration as
 a sole proprietorship, and this document will be updated with our UEN and
@@ -38,7 +38,7 @@ You must not use the Service, or allow anyone using your account, to:
   or goods requiring a licence you do not hold) unless you hold every
   licence Singapore law requires for that activity; or
 - do anything that Supabase's, Vercel's, Google's, or Telegram's own
-  terms of service prohibit — the Service is built on these providers'
+  terms of service prohibit. The Service is built on these providers'
   infrastructure and APIs, and a violation of their terms through your
   use of the Service is a violation of these Terms.
 
@@ -64,7 +64,7 @@ if you suspect unauthorised access.
 
 Each Kit is billed at a flat monthly rate per Kit, as quoted to you at
 sign-up or shown in your dashboard. Quoted fees are shown as "GST not
-applicable — Merqo is not GST-registered"; if Merqo registers for GST,
+applicable (Merqo is not GST-registered)"; if Merqo registers for GST,
 GST will be added to fees billed from the date registration takes effect
 and this document will be updated accordingly.
 
@@ -79,7 +79,7 @@ current billing cycle, and you retain access until then.
 ## Refunds and cancellation
 
 Fees already paid are not refunded on a pro-rata basis if you cancel
-partway through a billing cycle — you keep access for the remainder of
+partway through a billing cycle. You keep access for the remainder of
 the cycle you have paid for, but we do not refund the unused portion.
 
 If a payment fails or is not made when due, we will notify you and
@@ -89,6 +89,18 @@ payment is made. If payment remains outstanding for 30 days from the due
 date, we may terminate the affected Kit's subscription and, subject to
 the retention schedule in our Privacy Policy, delete the data associated
 with it.
+
+## Our intellectual property
+
+We and our licensors own all right, title, and interest in the Service
+itself, including its software, source code, design, and the Merqo
+name and logo. Nothing in these Terms transfers any of that ownership to
+you. Subject to these Terms, we grant you a limited, non-exclusive,
+non-transferable licence to access and use the Service for your
+business's own operations for as long as your account is active. You
+must not copy, reverse-engineer, resell, or create a derivative work
+from the Service itself, except to the extent applicable law prevents
+this restriction.
 
 ## Your content and intellectual property
 
@@ -113,8 +125,8 @@ account and profile data that lets you use one login across Kits), of
 the cross-kit customer-identity store (the shared record that recognises
 the same end customer across Kits), and of consent and acceptance records
 (including records of your acceptance of these Terms). For kit-local end
-customer transaction records — the day-to-day queue, loyalty, payment,
-inventory, and print-order data a Kit generates for your business — we
+customer transaction records (the day-to-day queue, loyalty, payment,
+inventory, and print-order data a Kit generates for your business), we
 act as a data intermediary, processing that data only on your written
 instruction (including instructions given through your configuration of
 a Kit). See our Privacy Policy for the full detail of what we collect,
@@ -147,11 +159,24 @@ relationship with your own payment service provider. This indemnity is
 in addition to, and does not limit, the indemnity in Your content and
 intellectual property above.
 
+## Service availability
+
+The Service is provided on an "as is" and "as available" basis. We do
+not warrant that the Service will be uninterrupted, secure, or
+error-free, and we do not guarantee any specific level of uptime or
+availability. Except as expressly stated in these Terms, we exclude all
+warranties, conditions, and representations of any kind, whether express
+or implied, including any implied warranty of satisfactory quality,
+fitness for a particular purpose, or non-infringement, to the extent
+Singapore law allows us to do so. This section does not affect our
+obligations for personal data under Data protection and Security
+incident notification above.
+
 ## Our liability to you
 
 Nothing in these Terms excludes or limits either party's liability for
 death or personal injury caused by negligence, or for fraud or
-fraudulent misrepresentation — those liabilities cannot be excluded or
+fraudulent misrepresentation; those liabilities cannot be excluded or
 limited under Singapore law and are not excluded or limited here.
 
 Subject to that, we exclude liability for indirect or consequential
@@ -194,8 +219,8 @@ material change and no fee increase takes effect during a billing cycle
 you have already paid for. If we make a material change, you may
 terminate the affected Kit without penalty at any time before the change
 takes effect, by notifying us in the manner described in General terms.
-A non-material change — a typo fix or a clarification that does not
-change the substance of these Terms — may take effect without the notice
+A non-material change (a typo fix or a clarification that does not
+change the substance of these Terms) may take effect without the notice
 period above; we record non-material changes in our changelog only.
 
 ## Term and termination

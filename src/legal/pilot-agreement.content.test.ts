@@ -46,4 +46,8 @@ describe("pilot-agreement.md", () => {
   it("states confidentiality is mutual", () => {
     expect(source).toMatch(/mutual/i);
   });
+
+  it("contains no em dash", () => {
+    expect(source).not.toMatch(/—/);
+  });
 });

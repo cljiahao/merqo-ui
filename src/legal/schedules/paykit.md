@@ -10,7 +10,7 @@ of Service in respect of paykit, this Schedule controls.
 paykit is a deposit- and payment-**tracking** tool. Merqo is not a
 payment service provider under Singapore's Payment Services Act 2019
 ("PSA"), and paykit is not designed, built, or operated to bring Merqo
-within any regulated payment service the PSA defines — including account
+within any regulated payment service the PSA defines, including account
 issuance, domestic or cross-border money transfer, merchant acquisition,
 e-money issuance, or digital payment token services.
 
@@ -50,8 +50,8 @@ change; this Schedule will be updated if that happens.
 ## The Vendor's own payment service provider
 
 The Vendor's relationship with its own payment service provider, bank,
-or payment gateway — including that provider's fees, settlement times,
-chargebacks, and compliance obligations — is the Vendor's alone. Merqo is
+or payment gateway (including that provider's fees, settlement times,
+chargebacks, and compliance obligations) is the Vendor's alone. Merqo is
 not a party to it, has no visibility into its terms, and takes no
 responsibility for that provider's acts or omissions. The Vendor is
 solely responsible for holding any licence, registration, or exemption
@@ -60,7 +60,7 @@ of payments.
 
 ## Deposits and refunds
 
-Where a Vendor uses paykit to track deposits, the Vendor — not Merqo —
+Where a Vendor uses paykit to track deposits, the Vendor, not Merqo,
 determines the deposit amount, the conditions for forfeiting or refunding
 it, and whether and when a refund is due. paykit records what the Vendor
 configures and reports; it does not adjudicate a deposit or refund

@@ -20,7 +20,7 @@ loopkit tracks stamps, referral progress, and reward status as a
 **record-keeping service only**: it records what the Vendor's own rules
 say has been earned, and displays that record to the Vendor and, where
 the Vendor enables it, to the end customer. That record is evidence of
-what loopkit was told and calculated — it is not a guarantee, on Merqo's
+what loopkit was told and calculated; it is not a guarantee, on Merqo's
 part, that the Vendor will redeem it.
 
 ## No liability for a Vendor's non-redemption

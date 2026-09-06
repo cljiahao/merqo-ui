@@ -60,4 +60,12 @@ describe("privacy.md", () => {
     expect(source).toMatch(/5 years/);
     expect(source).toMatch(/90 days/);
   });
+
+  it("does not use GDPR-only terminology (PDPA has no general erasure right)", () => {
+    expect(source.toLowerCase()).not.toMatch(/legitimate.interest|right to erasure/);
+  });
+
+  it("contains no em dash", () => {
+    expect(source).not.toMatch(/—/);
+  });
 });

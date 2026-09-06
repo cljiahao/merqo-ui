@@ -20,10 +20,10 @@ printkit's supported label printers run **NIIMBOT** firmware and, where
 the Vendor sets one up, a NIIMBOT companion app. NIIMBOT's firmware and
 app are third-party software Merqo does not develop, control, or operate.
 
-When a Vendor prints a label through printkit, the **label content** —
-the text printkit sends to be printed, which can include an end
+When a Vendor prints a label through printkit, the **label content**
+(the text printkit sends to be printed, which can include an end
 customer's name and order number where the Vendor chooses to print
-these — is transmitted to the NIIMBOT printer's firmware and, depending
+these) is transmitted to the NIIMBOT printer's firmware and, depending
 on how the Vendor's device is set up, to NIIMBOT's own servers or
 companion app, in order for the label to print. That transmission and
 any processing NIIMBOT's firmware or servers perform on label content

@@ -2,7 +2,7 @@
 
 This Pilot / User Acceptance Testing Agreement ("Agreement") is between
 Merqo, operated by Lee Jia Hao Clarence, trading as Merqo (sole
-proprietorship — ACRA registration pending) ("Merqo", "we", "us", "our"),
+proprietorship, ACRA registration pending) ("Merqo", "we", "us", "our"),
 and [Pilot vendor's legal/business name] ("Pilot Vendor", "you", "your").
 This Agreement is signed by both parties and applies only to the Pilot
 Vendor named above; it is not a public or self-serve document, and it
@@ -79,8 +79,8 @@ party already lawfully held before receiving it from the other.
 ## Data during the pilot
 
 During the Pilot Term, a Pilot Kit processes the Pilot Vendor's real
-end-customer data — including phone numbers, order or booking history,
-and Telegram links — as live production data, handled in accordance with
+end-customer data, including phone numbers, order or booking history,
+and Telegram links, as live production data, handled in accordance with
 Merqo's Privacy Policy. Using a Pilot Kit during the Pilot Term places no
 obligation on Merqo to launch that Pilot Kit generally, and no obligation
 on the Pilot Vendor to convert to a paid plan at the end of the Pilot
@@ -115,9 +115,9 @@ Wind-down applies in the same way.
 This Agreement is governed by the law of Singapore, on the same basis as
 set out in Governing law and disputes in the Merqo Vendor Terms of
 Service. The advance-consent novation clause in the Merqo Vendor Terms
-of Service's General terms section — under which the Pilot Vendor
+of Service's General terms section (under which the Pilot Vendor
 consents in advance to Merqo assigning or novating its agreement with
-Merqo to a Merqo private limited company once one is incorporated —
+Merqo to a Merqo private limited company once one is incorporated)
 applies to this Agreement as well and is not restated separately here;
 a Pilot Vendor who later converts to the standard Terms of Service is
 not asked to consent to that novation a second time. Notices under this

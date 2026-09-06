@@ -16,7 +16,7 @@ across items and locations.
 The Vendor is solely responsible for the accuracy of the stock records it
 enters into stockkit, including opening quantities, stock movements, and
 adjustments. **Merqo does not verify physical inventory** against a
-Vendor's stockkit records in any way — stockkit reflects only what the
+Vendor's stockkit records in any way. stockkit reflects only what the
 Vendor or its staff record, and Merqo is not responsible for a
 discrepancy between a stockkit record and the Vendor's actual physical
 stock, however that discrepancy arises.

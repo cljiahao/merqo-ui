@@ -14,15 +14,15 @@ Merqo is the **data controller** for the following categories of personal
 data, because we determine the purpose and manner of processing them
 ourselves:
 
-- cross-kit vendor identity — a vendor's account and profile data that
+- cross-kit vendor identity: a vendor's account and profile data that
   lets the vendor sign in once and use it across Kits (`vendor_links`,
   `vendor_profile`);
-- the cross-kit customer-identity store (`merqo.customers`) — an end
+- the cross-kit customer-identity store (`merqo.customers`): an end
   customer's phone number and, where connected, Telegram chat ID, used to
   recognise the same person across every Kit they interact with;
-- a vendor's Telegram bot link — the record connecting a vendor's account
+- a vendor's Telegram bot link: the record connecting a vendor's account
   to their Telegram chat for vendor-facing alerts;
-- consent records and acceptance records — including records of a
+- consent records and acceptance records, including records of a
   vendor's acceptance of our Terms of Service and this Privacy Policy;
 - support messages a vendor or end customer sends us, and vendor NPS
   (satisfaction survey) feedback;
@@ -35,7 +35,7 @@ processing personal data only on the vendor's written instruction
 (including instructions given through a vendor's own configuration of a
 Kit): the day-to-day order, booking, loyalty-stamp, and stock records a
 Kit generates for a vendor's business. For that category, **the vendor is
-the data controller** — the vendor is responsible for giving their end
+the data controller**. The vendor is responsible for giving their end
 customers the notices the Personal Data Protection Act ("PDPA") requires
 and for obtaining any consent the vendor needs before collecting, using,
 or disclosing that data through a Kit.
@@ -53,9 +53,9 @@ birthday-bonus feature, **birthdate** (day and month, used to time a
 loyalty reward).
 
 **Referral host data**: loopkit's referral mechanic lets a vendor enter a
-**referral host's** phone number — a named individual who is not
+**referral host's** phone number (a named individual who is not
 necessarily an existing customer, and who has no direct relationship
-with Merqo — so that a referral reward can be tracked and, where
+with Merqo), so that a referral reward can be tracked and, where
 Telegram is connected, notified. We treat a referral host's phone number
 with the same protection as any other personal data we hold, even though
 the referral host has not themselves signed up to any Kit.
@@ -64,45 +64,45 @@ the referral host has not themselves signed up to any Kit.
 
 Each category above is collected for a specific purpose:
 
-- **account operation** — vendor account and profile data, to run the
+- **account operation**: vendor account and profile data, to run the
   vendor's account and dashboard;
-- **cross-kit sign-in** — vendor identity data, so a vendor authenticates
+- **cross-kit sign-in**: vendor identity data, so a vendor authenticates
   once and reaches every Kit they use;
-- **transactional notifications** — an end customer's phone number,
+- **transactional notifications**: an end customer's phone number,
   Telegram chat ID, and order/booking data, to send order confirmations,
   queue updates, loyalty rewards, and referral alerts. We use this data
-  for transactional messages only — **never for marketing** — to the end
+  for transactional messages only (**never for marketing**) to the end
   customer;
-- **vendor support and health triage** — support messages, NPS feedback,
+- **vendor support and health triage**: support messages, NPS feedback,
   and a vendor's own product-usage signal, through the `vendor-activity`
   endpoint, which flags vendors who may need proactive support (for
   example, a vendor whose usage has dropped) so our team can reach out.
   We name this purpose explicitly rather than describing it only as
   aggregate product metrics;
-- **fraud and security** — authentication records and request logs, to
+- **fraud and security**: authentication records and request logs, to
   detect and prevent unauthorised access and abuse of the Service; and
-- **legal and contract evidence** — acceptance records and consent
+- **legal and contract evidence**: acceptance records and consent
   records, to demonstrate what a vendor agreed to and when.
 
 ## Cross-kit customer identity
 
 `merqo.customers` is the shared record that lets an end customer's phone
 number and, where connected, Telegram chat ID be recognised across every
-Kit they interact with — so, for example, a transactional notification
+Kit they interact with, so, for example, a transactional notification
 reaches them regardless of which Kit triggered it, and they are not
 treated as a stranger the first time a second vendor uses a different
 Kit to serve them.
 
 Where an end customer connects their Telegram account to a vendor's Kit,
 we capture their consent to that connection at the point they connect
-it — the Telegram connection flow itself is the consent step, and
+it. The Telegram connection flow itself is the consent step, and
 `/stop` (see Our Telegram bot below) withdraws it.
 
 **Known gap.** An end customer who only ever gives their phone number to
 a vendor, and never connects Telegram, has not gone through an explicit
 consent step for being linked into the cross-kit customer-identity store
 today. We are aware of this gap, we are tracking it, and it is not yet
-fixed — we do not claim an explicit consent mechanism exists for
+fixed; we do not claim an explicit consent mechanism exists for
 phone-only linkage until it is actually built. Until it is fixed, an end
 customer in this position can exercise the rights described in Your
 rights below by contacting us directly.
@@ -116,7 +116,7 @@ vendors. The bot is never used to send marketing messages to anyone.
 Sending `/stop` to the bot disconnects a chat from Merqo and stops
 further messages to it. Sending `/privacy` returns a link back to this
 Privacy Policy. Because Telegram is a third-party service, data we send
-to it — a message's content and the recipient's Telegram chat ID — is
+to it (a message's content and the recipient's Telegram chat ID) is
 processed on Telegram's infrastructure outside Singapore, subject to
 Telegram's own privacy policy (see Who we share it with below).
 
@@ -138,18 +138,18 @@ We share personal data with the following sub-processors, each acting
 under their own terms of service and privacy policy, and each engaged
 only to the extent needed to provide the Service:
 
-- **Supabase** — database hosting for the Service's data, including
+- **Supabase**: database hosting for the Service's data, including
   personal data described in What we collect above.
-- **Vercel** — application hosting and infrastructure logs for the
+- **Vercel**: application hosting and infrastructure logs for the
   Service.
-- **Telegram** — bot messaging, as described in Our Telegram bot above.
-- **Google** — OAuth sign-in, where a vendor or end customer chooses to
+- **Telegram**: bot messaging, as described in Our Telegram bot above.
+- **Google**: OAuth sign-in, where a vendor or end customer chooses to
   sign in with a Google account.
-- **NIIMBOT** — printkit's label-printer firmware. When a vendor uses
-  printkit to print a label, the label's printed text — which can
-  include an end customer's name and order number — is sent to the
+- **NIIMBOT**: printkit's label-printer firmware. When a vendor uses
+  printkit to print a label, the label's printed text (which can
+  include an end customer's name and order number) is sent to the
   NIIMBOT printer firmware to be printed.
-- **Sentry** — error monitoring, used by **paykit only**, and inactive
+- **Sentry**: error monitoring, used by **paykit only**, and inactive
   unless a paykit deployment has it configured.
 
 We do not sell personal data, and we do not share personal data with any
@@ -170,18 +170,18 @@ basis described in this policy and that provider's own terms.
 We keep personal data only as long as needed for the purpose it was
 collected for, or as required by law:
 
-- **audit and security logs** — 5 years, aligned to IRAS record-keeping
+- **audit and security logs**: 5 years, aligned to IRAS record-keeping
   requirements (see Audit and security logs below);
 - **acceptance records** (a vendor's acceptance of our Terms of Service
-  and this Privacy Policy) — kept indefinitely, as evidence of the
+  and this Privacy Policy): kept indefinitely, as evidence of the
   contract between us;
 - **end customer records** (in the cross-kit customer-identity store and
-  kit-local order/booking records) — kept until the vendor relationship
+  kit-local order/booking records): kept until the vendor relationship
   that generated them ends, plus a short tail for support and dispute
   purposes, or until the end customer withdraws consent, whichever comes
   first;
-- **request and access logs** — 90 days; and
-- **printkit label-job data** — 90 days after the label is printed.
+- **request and access logs**: 90 days; and
+- **printkit label-job data**: 90 days after the label is printed.
 
 ## Audit and security logs
 
@@ -192,28 +192,35 @@ include the actor's email address in its detail, so that an action can
 be attributed to a specific person.
 
 Audit log rows are retained for **5 years** as a legal and security
-record, and are **exempt from correction or erasure requests** on that
-legitimate-interest basis: altering or deleting an audit log entry would
+record, and are **exempt from a correction request or from deletion on
+withdrawal of consent**: altering or deleting an audit log entry would
 defeat its purpose as a reliable record of what happened. We state this
 as policy rather than leaving it silent.
 
 ## Your rights
 
-Under the PDPA, you can ask us for access to, correction of, or deletion
-of your personal data, by contacting us at the address in Contact and
-DPO below.
+Under the PDPA, you can ask us for access to and correction of your
+personal data, and you can withdraw any consent you have given us to
+collect, use, or disclose it, by contacting us at the address in Contact
+and DPO below. The PDPA does not give you a standalone right to demand
+deletion of your data; where you withdraw consent, we stop collecting,
+using, or disclosing your personal data for the purpose(s) you withdrew
+consent for, and, once we no longer need it for any purpose (including a
+legal or business purpose), we delete or anonymise it, in line with How
+long we keep it above.
 
 We will act on a valid request as quickly as we reasonably can. Today,
-fulfilling a correction or deletion request at scale is a **manual
-process** — we do not yet have a self-serve deletion tool, and we do not
-claim to. Where a request affects data we hold as a data intermediary on
-a vendor's instruction (see Our roles above), we will direct you to that
-vendor, or process the request on the vendor's instruction where the
-vendor has authorised us to.
+fulfilling an access, correction, or consent-withdrawal request at scale
+is a **manual process**. We do not yet have a self-serve tool for this,
+and we do not claim to. Where a request affects data we hold as a data
+intermediary on a vendor's instruction (see Our roles above), we will
+direct you to that vendor, or process the request on the vendor's
+instruction where the vendor has authorised us to.
 
-Some data is exempt from a correction or deletion request — see Audit
-and security logs above for the audit-log exemption, and How long we
-keep it for records we retain as evidence of a contract.
+Some data is exempt from a correction request or from deletion on
+withdrawal of consent; see Audit and security logs above for the
+audit-log exemption, and How long we keep it for records we retain as
+evidence of a contract.
 
 ## Data breaches
 
@@ -230,7 +237,7 @@ under Part 6A of the PDPA.
 ## Contact and DPO
 
 Merqo is operated by Lee Jia Hao Clarence, trading as Merqo
-(sole proprietorship — ACRA registration pending) ("Merqo", "we", "us",
+(sole proprietorship, ACRA registration pending) ("Merqo", "we", "us",
 "our").
 
 For a question about this Privacy Policy, or to make a request described

@@ -1,9 +1,18 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { LegalDocument, getNodeText } from "./legal-document";
 
 describe("LegalDocument", () => {
+  it("renders a Back button that navigates back in browser history", async () => {
+    const backSpy = vi.spyOn(window.history, "back").mockImplementation(() => {});
+    render(<LegalDocument doc="terms" />);
+    await userEvent.click(screen.getByRole("button", { name: /back/i }));
+    expect(backSpy).toHaveBeenCalledOnce();
+    backSpy.mockRestore();
+  });
+
   it("renders the version/effective-date line, not a draft banner", () => {
     render(<LegalDocument doc="terms" />);
     expect(screen.getByText(/^Version \d{4}-\d{2}-\d{2}/)).toBeInTheDocument();
