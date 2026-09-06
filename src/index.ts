@@ -59,3 +59,5 @@ export { LegalFooterLinks } from "./legal-footer-links";
 export type { LegalFooterLinksProps } from "./legal-footer-links";
 export { TermsAcceptanceCheckbox } from "./legal-acceptance-checkbox";
 export type { TermsAcceptanceCheckboxProps } from "./legal-acceptance-checkbox";
+export { AboutMerqo } from "./about-merqo";
+export type { AboutMerqoProps } from "./about-merqo";

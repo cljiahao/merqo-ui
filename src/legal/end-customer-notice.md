@@ -16,14 +16,14 @@ message.
 
 You're receiving a message because the vendor you're a customer of used
 Merqo's software to send you a transactional update about your own order
-or reward — for example, a queue update, an order or payment
+or reward, for example a queue update, an order or payment
 confirmation, or a loyalty-stamp or reward notice. Merqo does not send
 you marketing messages.
 
 ## Who's responsible
 
 The vendor is responsible for the order, reward, or payment this message
-relates to — not Merqo. If something is wrong with your order, a reward
+relates to, not Merqo. If something is wrong with your order, a reward
 you were promised, or a payment, please contact the vendor directly; they
 are the party who owes it to you, and Merqo has no part in that
 relationship.

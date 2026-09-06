@@ -30,6 +30,13 @@ describe("per-kit schedules", () => {
     expect(read("./schedules/qkit.md").length).toBeGreaterThan(0);
     expect(read("./schedules/stockkit.md").length).toBeGreaterThan(0);
   });
+
+  it.each(["qkit", "loopkit", "paykit", "stockkit", "printkit"])(
+    "%s schedule contains no em dash",
+    (slug) => {
+      expect(read(`./schedules/${slug}.md`)).not.toMatch(/—/);
+    },
+  );
 });
 
 describe("end-customer-notice.md", () => {
@@ -43,5 +50,8 @@ describe("end-customer-notice.md", () => {
   });
   it("is not a contract with the end-customer", () => {
     expect(s.toLowerCase()).not.toMatch(/by (using|continuing).{0,20}you agree/);
+  });
+  it("contains no em dash", () => {
+    expect(s).not.toMatch(/—/);
   });
 });

@@ -60,6 +60,13 @@ export function LegalDocument({ doc, className }: LegalDocumentProps) {
 
   return (
     <article className={cn("mx-auto max-w-3xl px-5 py-10 text-sm", className)}>
+      <button
+        type="button"
+        onClick={() => window.history.back()}
+        className="mb-4 text-xs text-muted-foreground hover:text-foreground"
+      >
+        ← Back
+      </button>
       <p className="mb-6 text-xs text-muted-foreground">
         Version {version} · Effective {version}
       </p>
