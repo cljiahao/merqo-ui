@@ -16,6 +16,15 @@ describe("LegalDocument", () => {
     expect(heading.id).toBe("who-we-are");
   });
 
+  it("renders the document's own H1 with a slugified id and styling", () => {
+    render(<LegalDocument doc="terms" />);
+    const heading = screen.getByText("Merqo Vendor Terms of Service");
+    expect(heading.tagName).toBe("H1");
+    expect(heading.id).toBe("merqo-vendor-terms-of-service");
+    expect(heading.className).toContain("font-display");
+    expect(heading.className).toContain("text-2xl");
+  });
+
   it("renders the end-customer notice", () => {
     render(<LegalDocument doc="end-customer-notice" />);
     expect(screen.getByText(/Privacy Policy/)).toBeInTheDocument();

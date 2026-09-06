@@ -28,6 +28,7 @@ export function TermsAcceptanceCheckbox({
         <Label htmlFor="legal-name">Your name</Label>
         <Input
           id="legal-name"
+          name="legal_name"
           value={legalName}
           onChange={(e) => onLegalNameChange(e.target.value)}
           placeholder="As the person accepting on behalf of your business"

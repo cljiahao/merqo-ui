@@ -158,12 +158,8 @@ a vendor's or end customer's separate consent.
 
 ## Where your data is stored
 
-Our infrastructure runs on Supabase and Vercel. Merqo's data is
-**primarily hosted in Singapore-region cloud infrastructure, to be
-confirmed against the live Supabase and Vercel project configuration
-before this policy is published** — this line is an explicit
-founder-must-confirm placeholder, not a guessed region, and must be
-replaced with the verified region before this document goes live.
+Our infrastructure runs on Supabase and Vercel. Merqo's cloud
+infrastructure (Supabase, Vercel) is hosted in the Singapore region.
 
 Where a sub-processor listed in Who we share it with processes data
 outside Singapore (for example, Telegram), that transfer is made on the
@@ -239,4 +235,4 @@ Merqo is operated by [Founder's full legal name], trading as Merqo
 
 For a question about this Privacy Policy, or to make a request described
 in Your rights above, contact our Data Protection Officer at
-[DPO contact email].
+legal@merqo.io.

@@ -35,8 +35,8 @@ export function getNodeText(node: React.ReactNode): string {
   return "";
 }
 
-function headingRenderer(level: 2 | 3) {
-  const Tag = level === 2 ? "h2" : "h3";
+function headingRenderer(level: 1 | 2 | 3) {
+  const Tag = level === 1 ? "h1" : level === 2 ? "h2" : "h3";
   return ({ children }: { children?: React.ReactNode }) => {
     const text = getNodeText(children);
     return (
@@ -44,7 +44,7 @@ function headingRenderer(level: 2 | 3) {
         id={slugify(text)}
         className={cn(
           "font-display font-semibold text-foreground scroll-mt-24",
-          level === 2 ? "mt-8 text-xl" : "mt-5 text-lg",
+          level === 1 ? "mt-0 text-2xl" : level === 2 ? "mt-8 text-xl" : "mt-5 text-lg",
         )}
       >
         {children}
@@ -66,6 +66,7 @@ export function LegalDocument({ doc, className }: LegalDocumentProps) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
+          h1: headingRenderer(1),
           h2: headingRenderer(2),
           h3: headingRenderer(3),
           p: ({ children }) => (

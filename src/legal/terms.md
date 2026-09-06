@@ -228,8 +228,11 @@ required.
 These Terms, together with our Privacy Policy and any Kit-specific
 schedule we tell you applies to your account, are the entire agreement
 between you and us in respect of the Service, and replace any prior
-agreement or understanding on the same subject. If any provision of
-these Terms is found unenforceable, the rest continue in effect and the
+agreement or understanding on the same subject, except that where a
+Pilot/UAT Agreement between us is in effect, that agreement prevails
+over these Terms for the Pilot Kits and Pilot Term it covers. If any
+provision of these Terms is found unenforceable, the rest continue in
+effect and the
 unenforceable provision is read down to the minimum extent needed to
 make it enforceable.
 

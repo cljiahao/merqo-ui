@@ -21,9 +21,23 @@ const SCHEDULE_ORDER: [string, string][] = [
   ["printkit", printkitScheduleMd],
 ];
 
+/** Strips a schedule's own leading H1 (its `## {slug} schedule` divider
+ *  already serves as its heading) and demotes every remaining heading by
+ *  one level, so a schedule's clauses nest under its divider instead of
+ *  reading as siblings of the base document's own top-level clauses. */
+function demoteScheduleHeadings(content: string): string {
+  const lines = content.split("\n");
+  const h1Index = lines.findIndex((line) => /^#\s+/.test(line));
+  if (h1Index !== -1) lines.splice(h1Index, 1);
+  return lines
+    .map((line) => (/^#{1,5}\s/.test(line) ? `#${line}` : line))
+    .join("\n")
+    .trim();
+}
+
 function withSchedules(base: string): string {
   const annex = SCHEDULE_ORDER.map(
-    ([slug, content]) => `## ${slug} schedule\n\n${content}`,
+    ([slug, content]) => `## ${slug} schedule\n\n${demoteScheduleHeadings(content)}`,
   ).join("\n\n");
   return `${base}\n\n## Annex: Per-Kit Schedules\n\n${annex}`;
 }

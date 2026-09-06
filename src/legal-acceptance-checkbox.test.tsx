@@ -50,4 +50,21 @@ describe("TermsAcceptanceCheckbox", () => {
     await userEvent.type(screen.getByLabelText(/your name/i), "A");
     expect(onLegalNameChange).toHaveBeenCalled();
   });
+
+  it("includes the legal name input in native form submission via FormData", () => {
+    render(
+      <form>
+        <TermsAcceptanceCheckbox
+          checked={false}
+          onCheckedChange={() => {}}
+          legalName="Acme Pte Ltd"
+          onLegalNameChange={() => {}}
+        />
+      </form>,
+    );
+    const input = screen.getByLabelText(/your name/i) as HTMLInputElement;
+    expect(input).toHaveAttribute("name", "legal_name");
+    const formData = new FormData(input.closest("form")!);
+    expect(formData.get("legal_name")).toBe("Acme Pte Ltd");
+  });
 });
