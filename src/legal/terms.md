@@ -8,7 +8,7 @@ you agree to these Terms on behalf of the business you represent.
 
 ## Who we are
 
-Merqo is operated by [Founder's full legal name], trading as Merqo (sole proprietorship — ACRA registration pending) ("Merqo", "we", "us", "our").
+Merqo is operated by Lee Jia Hao Clarence, trading as Merqo (sole proprietorship — ACRA registration pending) ("Merqo", "we", "us", "our").
 Merqo is a family of small-business software tools — queueing, loyalty,
 payments, inventory, and print-routing kits — built for small and
 medium-sized businesses in Singapore. Merqo's registered business form is

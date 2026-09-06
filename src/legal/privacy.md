@@ -229,7 +229,7 @@ under Part 6A of the PDPA.
 
 ## Contact and DPO
 
-Merqo is operated by [Founder's full legal name], trading as Merqo
+Merqo is operated by Lee Jia Hao Clarence, trading as Merqo
 (sole proprietorship — ACRA registration pending) ("Merqo", "we", "us",
 "our").
 

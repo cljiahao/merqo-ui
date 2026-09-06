@@ -1,5 +1,13 @@
 # merqo-ui/src/legal/CHANGELOG.md
 
+## 2026-09-06 (same-day founder-name fill)
+terms.md, privacy.md, pilot-agreement.md: filled the contracting-party
+placeholder with the founder's real legal name (Lee Jia Hao Clarence),
+replacing the unfilled `[Founder's full legal name]` bracket. Party is
+still described as "trading as Merqo (sole proprietorship — ACRA
+registration pending)" — registration status unchanged. No real vendor
+had accepted any prior version at the time of this fix.
+
 ## 2026-09-06
 privacy.md: removed in-line draft/founder-confirm language from Where your
 data is stored (states the Singapore hosting region as fact, no hedging),

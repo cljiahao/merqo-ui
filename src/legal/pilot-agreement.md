@@ -1,7 +1,7 @@
 # Merqo Pilot / User Acceptance Testing Agreement
 
 This Pilot / User Acceptance Testing Agreement ("Agreement") is between
-Merqo, operated by [Founder's full legal name], trading as Merqo (sole
+Merqo, operated by Lee Jia Hao Clarence, trading as Merqo (sole
 proprietorship — ACRA registration pending) ("Merqo", "we", "us", "our"),
 and [Pilot vendor's legal/business name] ("Pilot Vendor", "you", "your").
 This Agreement is signed by both parties and applies only to the Pilot

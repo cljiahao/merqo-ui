@@ -32,9 +32,9 @@ describe("terms.md", () => {
     expect(source).toContain(heading);
   });
 
-  it("names Merqo's contracting party as the pre-ACRA placeholder", () => {
+  it("names Merqo's contracting party, pre-ACRA", () => {
     expect(source).toContain(
-      "[Founder's full legal name], trading as Merqo (sole proprietorship — ACRA registration pending)",
+      "Lee Jia Hao Clarence, trading as Merqo (sole proprietorship — ACRA registration pending)",
     );
   });
 
