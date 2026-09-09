@@ -1,6 +1,6 @@
 {
   "name": "@merqo/ui",
-  "version": "0.25.1",
+  "version": "0.26.0",
   "private": true,
   "repository": {
     "type": "git",
@@ -19,6 +19,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./legal": {
+      "types": "./dist/legal.d.ts",
+      "import": "./dist/legal.js"
     }
   },
   "files": [
