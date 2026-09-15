@@ -228,27 +228,6 @@ works locally.
   and `end: ReactNode` — so each kit keeps full control of its own
   wordmark markup and right-side links/CTAs (copy and hrefs are legitimate
   per-kit content, not something this package should standardize).
-- `ProfileForm` — the full profile/settings page composition (stall/shop
-  name → photo → password | display name → social links), each section
-  independently saved. Never calls a backend directly — every mutation is
-  an injected prop, so this component isn't coupled to any one kit's data
-  layer. Built on the package's own vendored shadcn `Input`/`Label`
-  primitives (no more raw `<input>`/`<label>` elements). Optional
-  `sectionWrapper?: (content: ReactNode) => ReactNode` forwards straight
-  through to every one of its 5 internal `Section` calls' own `wrapper`
-  prop, so a consuming kit can wrap every section in its own card shell in
-  one place. The avatar section composes `ImageUploader` internally (preview,
-  remove, client-side resize, validation) — pass through `avatarBucket`,
-  `avatarPathPrefix`, `onAvatarUpload`, and the optional `avatar*` passthroughs
-  matching `ImageUploader`'s own props; `onSaveAvatar` now receives the
-  uploaded `string | null` URL, not a raw `File`. `SocialLinks` now has all
-  4 fields every kit uses: `website`, `instagram`, `facebook`, `tiktok`.
-  The stall-name, display-name, password, and website inputs carry
-  `autocomplete` hints (`organization`/`name`/`new-password`/`url`) so
-  password managers and browser autofill identify each field's purpose
-  (WCAG 1.3.5) instead of guessing — most consequentially for the password
-  field, where a missing `new-password` hint can make a browser offer
-  autofill for the vendor's *current* password into a change-password form.
 - `ImageUploader` — square (`thumb`) or wide (`banner`) image upload control
   with JPEG/PNG/WebP validation, a size cap, an injected browser-side resize
   step, and an injected storage write (`onUpload`) so the package stays
