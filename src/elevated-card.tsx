@@ -16,7 +16,7 @@ export function ElevatedCard({
   className,
   children,
   ...props
-}: ElevatedCardProps) {
+}: ElevatedCardProps): React.ReactElement {
   return (
     <As
       className={cn(

@@ -18,7 +18,11 @@ export interface FooterProps {
 // composed LegalFooterLinks — a footer link is low-frequency enough that a
 // full page load is an acceptable, deliberate simplification (unlike
 // DashboardNav's dense nav bar, which takes a LinkComponent for this reason).
-export function Footer({ wordmark, tagline, kitName }: FooterProps) {
+export function Footer({
+  wordmark,
+  tagline,
+  kitName,
+}: FooterProps): React.ReactElement {
   return (
     <footer className="border-t border-border">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-sm text-muted-foreground sm:flex-row">

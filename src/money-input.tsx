@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactElement } from "react";
 import { Input } from "./ui/input";
 import { useMoneyField } from "./use-money-field";
 
@@ -20,7 +20,7 @@ export function MoneyInput({
 } & Omit<
   ComponentProps<typeof Input>,
   "value" | "onChange" | "onFocus" | "onBlur"
->) {
+>): ReactElement {
   const field = useMoneyField(cents, onCommit);
   return <Input inputMode="decimal" {...inputProps} {...field} />;
 }

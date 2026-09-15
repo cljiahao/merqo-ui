@@ -21,7 +21,11 @@ const DefaultLink = ({
 
 /** Consistent "leave this page" nav — a real button (proper hit target,
  * hover/focus state), not a plain text link that reads as body copy. */
-export function BackButton({ href, label, LinkComponent }: BackButtonProps) {
+export function BackButton({
+  href,
+  label,
+  LinkComponent,
+}: BackButtonProps): React.ReactElement {
   const Link = LinkComponent ?? DefaultLink;
   return (
     <Button asChild variant="ghost" size="sm" className="rounded-lg">
