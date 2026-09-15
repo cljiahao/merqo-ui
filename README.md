@@ -333,6 +333,61 @@ works locally.
   caller-supplied, so this component owns only the table shell, never the
   domain columns. Deliberately not extended to kanban/card-grid list views
   (e.g. qkit's order board) — those are a genuinely different shape.
+- `BackButton({href, label, LinkComponent?})` — the "leave this page" nav
+  button (real `Button` hit target, not a plain text link) used at the top
+  of every kit's setup/edit sub-pages. `LinkComponent` defaults to a plain
+  `<a>`, same opt-in-router-Link contract as `DashboardNav`'s own prop.
+  Promoted 2026-09-16 after being found byte-identical in 2 of 4 kits and
+  near-identical in the other 2 (one kit's own copy literally commented
+  "Mirrors qkit's identical component").
+- `ElevatedCard({as?, className, children})` — the polished lifted-shadow
+  card shell used across profile/dashboard/setup pages, deliberately not
+  qkit's own scalloped `Ticket` theme (that stays local to qkit). `as`
+  picks `div`/`section`/`li`. Promoted 2026-09-16, same "found
+  byte-identical in half the kits" basis as `BackButton`.
+- `SOCIAL_LINK_FIELDS` / `SocialLinks` (from `./social-icons`) — the
+  vendor social-link field list (website/instagram/facebook/tiktok) with
+  real brand marks and official colors (`@icons-pack/react-simple-icons`,
+  `color="default"`); `website` gets a generic `lucide-react` globe tinted
+  via `currentColor` instead. `SocialLinksFields({value, onChange,
+  idPrefix})` is the ready-made form-field group built on it (labeled
+  inputs, `idPrefix` namespaces each field's `id` when a page renders more
+  than one instance). Promoted 2026-09-16 — same field list and form was
+  independently duplicated in all 4 kits.
+- `MoneyInput({cents, onCommit, ...inputProps})` / `useMoneyField(cents,
+  onCommit)` — a controlled dollar-amount `<Input>`. Reformats to the
+  canonical 2-decimal string only on blur (or on an external `cents`
+  change while unfocused), not on every keystroke — reformatting live
+  resets the caret to the end after each key, so typing "6.50"
+  left-to-right would otherwise land as "6.01". `MoneyInput` wraps the hook
+  as its own component so it's always called at a real component's top
+  level, safe to render from inside a `.map()`. Promoted 2026-09-16 from
+  qkit, the only kit that had it — loopkit's own dollar-amount field
+  (`reward_cost_cents`) hand-rolled a plain `<Input>` with manual
+  cents↔dollars conversion instead.
+- `qrSvg(text)` (from `./qr`) — renders `text` as an inline SVG markup
+  string via the `qrcode` package, for a caller to embed with
+  `dangerouslySetInnerHTML` (a Telegram deep link, a shop-join QR).
+  Promoted 2026-09-16 — merqo's own copy of this exact function already
+  documented itself as "same shape/library as loopkit's ... own qrSvg
+  helper"; this closes that gap instead of leaving a 3rd copy to drift.
+  Unrelated to `react-qr-code` (qkit's booth-QR-poster, paykit's booking-QR
+  view) — a heavier React-component wrapper for a different use case
+  (rendering a full poster page vs. embedding inline SVG), not yet unified.
+- `Footer({wordmark, tagline, kitName})` — the public-page footer shell:
+  wordmark slot, tagline, "© 2026 {kitName} · a Merqo kit", About link,
+  `LegalFooterLinks`, vendor sign-in link, in that fixed order. `wordmark`
+  is an already-linked element (own href/anchor behavior — e.g. a
+  same-page hash jump needs a native `<a>`, not a router `Link`), same
+  slot contract as `LandingNav`'s own `wordmark` prop. The About/sign-in
+  links render as plain `<a>` (not a `LinkComponent` prop) — a footer link
+  is low-frequency enough that a full page load is an acceptable,
+  deliberate simplification, matching the `LegalFooterLinks` it's
+  composed with. Promoted 2026-09-16 after 3 of 4 kits' footers were found
+  structurally identical (same layout order, differing only in
+  wordmark/tagline/kit-name) — see the design-critique sweep's footer-
+  parity work, which made them look identical without ever actually
+  sharing the component.
 
 ## Z-index scale
 
