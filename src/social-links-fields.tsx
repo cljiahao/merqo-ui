@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SOCIAL_LINK_FIELDS, type SocialLinks } from "./social-icons";
@@ -29,7 +30,7 @@ export function SocialLinksFields({
   value,
   onChange,
   idPrefix,
-}: SocialLinksFieldsProps) {
+}: SocialLinksFieldsProps): ReactElement {
   function setField(key: keyof SocialLinks, raw: string) {
     const next = { ...value };
     if (raw) next[key] = raw;
