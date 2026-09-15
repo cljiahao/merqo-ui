@@ -18,7 +18,7 @@ No npm registry — installed as a git dependency, pinned to a tag:
 
 ```json
 "dependencies": {
-  "@merqo/ui": "github:cljiahao/merqo-ui#v0.11.1"
+  "@merqo/ui": "github:cljiahao/merqo-ui#v0.27.0"
 }
 ```
 
@@ -269,6 +269,20 @@ works locally.
   progress-text, close/prev/next buttons, 4-directional arrow tinting) — a
   migrated kit can delete its own `tour.css` entirely. Popover base class is
   the generic `"tour-popover"`, not kit-specific.
+- `DashboardTours` — route-matched router for kits with more than one
+  dashboard page tour. Takes `tours: {id, route, steps}[]`, the caller's
+  current `pathname`, `seenTourIds: string[]`, and `onFirstSeen: (tourId) =>
+  Promise<void>`. Picks the tour whose `route` most specifically matches
+  `pathname` (longest match wins, so a nested route like
+  `/dashboard/booths/abc123` still resolves to the `/dashboard/booths` tour)
+  and mounts only that one via `DashboardTour` internally — a page with no
+  matching tour renders nothing at all, no floating button. Each mounted
+  tour always sees its own route as home (there's never a cross-page replay
+  to resume, since the active tour is already the one matching the current
+  route), so `DashboardTour`'s single-tour `isHomeRoute`/`navigateHome`
+  cross-page-replay mechanism stays available for kits that only need one
+  tour but isn't exercised here. `DashboardTour` itself is unchanged and
+  still exported directly for that single-tour case.
 - `VendorTelegramSection` — vendor-facing Telegram connect settings block
   (Phase A2 of the cross-kit Telegram integration design), the shared
   replacement for each kit's own now-retired per-kit vendor-alert bot's
