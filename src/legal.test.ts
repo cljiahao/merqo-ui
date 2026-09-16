@@ -26,6 +26,12 @@ describe("legal content getters", () => {
     }
   });
 
+  it("throws on an unknown kit slug rather than silently rendering an empty annex", () => {
+    expect(() => getLegalDocSource("terms", "not-a-real-kit")).toThrow(
+      /no schedule exists for this kit slug/,
+    );
+  });
+
   it("privacy and pilot sources are their own file content", () => {
     expect(getLegalDocSource("privacy")).toContain("Our roles");
     expect(getLegalDocSource("pilot")).toContain("What this pilot is");

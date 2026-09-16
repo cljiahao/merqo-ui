@@ -43,6 +43,11 @@ function withSchedules(base: string, kitSlug?: string): string {
   const entries = kitSlug
     ? SCHEDULE_ORDER.filter(([slug]) => slug === kitSlug)
     : SCHEDULE_ORDER;
+  if (kitSlug && entries.length === 0) {
+    throw new Error(
+      `getLegalDocSource("terms", "${kitSlug}"): no schedule exists for this kit slug`,
+    );
+  }
   const heading = kitSlug ? "## Annex: Schedule" : "## Annex: Per-Kit Schedules";
   const annex = entries
     .map(([slug, content]) => `## ${slug} schedule\n\n${demoteScheduleHeadings(content)}`)
