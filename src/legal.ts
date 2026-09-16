@@ -35,18 +35,27 @@ function demoteScheduleHeadings(content: string): string {
     .trim();
 }
 
-function withSchedules(base: string): string {
-  const annex = SCHEDULE_ORDER.map(
-    ([slug, content]) => `## ${slug} schedule\n\n${demoteScheduleHeadings(content)}`,
-  ).join("\n\n");
-  return `${base}\n\n## Annex: Per-Kit Schedules\n\n${annex}`;
+/** `kitSlug` given: only that kit's own schedule is appended (what a vendor
+ *  actually reads on that kit's /legal/terms page). `kitSlug` omitted: every
+ *  kit's schedule is appended (merqo hub's own page — a hub vendor isn't
+ *  tied to one kit, so the full annex is the right read there). */
+function withSchedules(base: string, kitSlug?: string): string {
+  const entries = kitSlug
+    ? SCHEDULE_ORDER.filter(([slug]) => slug === kitSlug)
+    : SCHEDULE_ORDER;
+  const heading = kitSlug ? "## Annex: Schedule" : "## Annex: Per-Kit Schedules";
+  const annex = entries
+    .map(([slug, content]) => `## ${slug} schedule\n\n${demoteScheduleHeadings(content)}`)
+    .join("\n\n");
+  return `${base}\n\n${heading}\n\n${annex}`;
 }
 
-/** Raw markdown for a document. `"terms"` is pre-composed with every
- *  per-kit schedule appended — kits hash this string server-side before
- *  calling POST /api/merqo/legal-accept, so the hash covers what's shown. */
-export function getLegalDocSource(doc: LegalDocType): string {
-  if (doc === "terms") return withSchedules(termsMd);
+/** Raw markdown for a document. `"terms"` is pre-composed with the relevant
+ *  per-kit schedule(s) appended, per `withSchedules` above — kits hash this
+ *  string server-side before calling POST /api/merqo/legal-accept, so the
+ *  hash covers exactly what's shown. */
+export function getLegalDocSource(doc: LegalDocType, kitSlug?: string): string {
+  if (doc === "terms") return withSchedules(termsMd, kitSlug);
   if (doc === "privacy") return privacyMd;
   return pilotMd;
 }

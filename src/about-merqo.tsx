@@ -43,7 +43,7 @@ export function AboutMerqo({ kitName, className, children }: AboutMerqoProps) {
           account, one sign-in, one dashboard.
         </p>
         <p>
-          Merqo is run by Lee Jia Hao Clarence, trading as Merqo (sole
+          Merqo is run by Clarence Lee, trading as Merqo (sole
           proprietorship, ACRA registration pending). Every kit is built
           for the same kind of vendor as that coffee cart: small, busy,
           and better off spending time on the product, not the queue.

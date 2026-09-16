@@ -1,5 +1,33 @@
 # merqo-ui/src/legal/CHANGELOG.md
 
+## 2026-09-16
+Two fixes, founder-requested:
+
+- **Per-kit schedule scoping.** `getLegalDocSource("terms", kitSlug)` now
+  takes an optional kit slug; when given, only that kit's own Annex
+  schedule is appended, not all 5. Previously every kit's `/legal/terms`
+  page called `getLegalDocSource("terms")` with no kit context, so a qkit
+  vendor read loopkit's, paykit's, printkit's, and stockkit's schedules
+  too, alongside their own. `LegalDocument` gained a matching optional
+  `kit` prop. merqo hub's own `/legal/terms` page is unchanged (still no
+  `kit` prop, still the full multi-schedule annex) — a hub vendor isn't
+  tied to one kit. Each kit's `terms/page.tsx` now passes its own slug
+  (`kit="qkit"` etc.), and each kit's `accept/actions.ts` now hashes
+  `getLegalDocSource(docType, "<kit>")` so the recorded `doc_sha256`
+  matches what that kit's vendor actually saw.
+- **Contracting-party name.** "Lee Jia Hao Clarence" replaced with
+  "Clarence Lee" in terms.md, privacy.md, pilot-agreement.md, and
+  about-merqo.tsx. Founder decision; ACRA registration (pending) will
+  carry the full legal name and UEN regardless once it completes.
+
+terms.md and privacy.md bumped to version 2026-09-16 (both changed:
+per-kit schedule scoping changes terms.md's composed output, and the name
+swap touches both). pilot-agreement.md also bumped since its hash changed
+from the name swap, though no clause's substance moved.
+version-manifest.json's 2026-09-16 entry is LF-normalized (matches CI,
+not this Windows checkout's CRLF working tree) — same known local-only
+`legal-version-guard.test.ts` failure mode as 2026-09-07 below.
+
 ## 2026-09-07
 Pre-lawyer-review sweep: removed every em dash from terms.md, privacy.md,
 pilot-agreement.md, end-customer-notice.md, and all 5 per-kit schedules,

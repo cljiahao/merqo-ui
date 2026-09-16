@@ -36,7 +36,7 @@ describe("terms.md", () => {
 
   it("names Merqo's contracting party, pre-ACRA", () => {
     expect(source).toContain(
-      "Lee Jia Hao Clarence, trading as Merqo (sole proprietorship, ACRA registration pending)",
+      "Clarence Lee, trading as Merqo (sole proprietorship, ACRA registration pending)",
     );
   });
 
