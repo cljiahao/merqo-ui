@@ -13,6 +13,10 @@ import { cn } from "./lib/utils";
 
 export interface LegalDocumentProps {
   doc: LegalDocType | "end-customer-notice";
+  /** Only meaningful for `doc="terms"`: shows that kit's own schedule
+   *  instead of every kit's. Omit on merqo hub's own page, where a
+   *  kit-agnostic vendor should see the full annex. */
+  kit?: string;
   className?: string;
 }
 
@@ -53,9 +57,9 @@ function headingRenderer(level: 1 | 2 | 3) {
   };
 }
 
-export function LegalDocument({ doc, className }: LegalDocumentProps) {
+export function LegalDocument({ doc, kit, className }: LegalDocumentProps) {
   const source =
-    doc === "end-customer-notice" ? getEndCustomerNoticeSource() : getLegalDocSource(doc);
+    doc === "end-customer-notice" ? getEndCustomerNoticeSource() : getLegalDocSource(doc, kit);
   const version = doc === "end-customer-notice" ? LEGAL_VERSIONS.privacy : LEGAL_VERSIONS[doc];
 
   return (
