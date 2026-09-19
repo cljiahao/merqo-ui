@@ -61,12 +61,12 @@ export default defineConfig([
     dts: false,
     clean: true,
     external: ["react", "react-dom", "driver.js", "driver.js/*"],
-    // No cross-entry chunk sharing: each module is fully self-contained, so
-    // esbuild keeps its own real "use client" directive (or correctly omits
-    // it) instead of losing it in a chunk shared with unrelated modules.
-    // Replaces a package-wide "use client" banner. See qkit's
-    // docs/meta/2026-09-18 AAR.
-    splitting: false,
+    // Each module's own entry file carries (or correctly omits) its real
+    // "use client" directive, and dist/index.js re-exports from those entry
+    // files -- so the module the server imports is always directive-correct.
+    // Shared chunks below that boundary need no directive of their own.
+    // Replaces a package-wide banner. See qkit's docs/meta/2026-09-18 AAR.
+    splitting: true,
     esbuildOptions: mdLoader,
   },
   {
