@@ -23,10 +23,43 @@ const distDtsExists = existsSync(distDtsPath);
 
 describe("build output", () => {
   it.skipIf(!distExists)(
-    'dist/index.js starts with "use client" (regression guard: esbuild strips bare directives when bundling multiple modules into one file - see tsup.config.ts banner)',
+    'dist/index.js carries no "use client" directive (regression guard: a package-wide directive turns every plain-data export into a client reference, so a Server Component reading e.g. SOCIAL_LINK_FIELDS gets an opaque stub instead of the array - see qkit docs/meta/2026-09-18 AAR)',
     () => {
       const contents = readFileSync(distIndexPath, "utf-8");
-      expect(contents.startsWith('"use client";')).toBe(true);
+      expect(contents.startsWith('"use client";')).toBe(false);
+      expect(contents).not.toMatch(/["']use client["']/);
+    },
+  );
+
+  it.skipIf(!distExists)(
+    'every entry whose source declares "use client" keeps that directive in its own dist file (regression guard: esbuild strips bare directives when it bundles several modules into one output, which is why index re-exports instead of bundling - see scripts/build-index.mjs)',
+    () => {
+      const distDir = path.dirname(distIndexPath);
+      const packageRoot = path.resolve(distDir, "..");
+      // Read tsup.config.ts as text rather than importing it: importing pulls
+      // in tsup -> esbuild, which refuses to load under vitest's jsdom
+      // environment ("new TextEncoder().encode('') instanceof Uint8Array").
+      const config = readFileSync(path.resolve(packageRoot, "tsup.config.ts"), "utf-8");
+      const entriesBlock = config.slice(
+        config.indexOf("const ENTRIES = {"),
+        config.indexOf("export default"),
+      );
+      const entries = [...entriesBlock.matchAll(/(?:"([^"]+)"|([\w-]+))\s*:\s*"(src\/[^"]+)"/g)].map(
+        (match) => ({ name: match[1] ?? match[2], source: match[3] }),
+      );
+      expect(entries.length).toBeGreaterThan(0);
+      const clientEntries = entries.filter(({ source }) =>
+        readFileSync(path.resolve(packageRoot, source), "utf-8").startsWith('"use client"'),
+      );
+      expect(clientEntries.length).toBeGreaterThan(0);
+      for (const { name } of clientEntries) {
+        const built = path.resolve(distDir, `${name}.js`);
+        expect(existsSync(built), `dist/${name}.js is missing`).toBe(true);
+        expect(
+          readFileSync(built, "utf-8").startsWith('"use client";'),
+          `dist/${name}.js lost its "use client" directive`,
+        ).toBe(true);
+      }
     },
   );
 
