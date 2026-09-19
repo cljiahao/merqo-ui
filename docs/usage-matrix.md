@@ -81,21 +81,32 @@ neither can replace the other:
 - `react-qr-code` is a **synchronous React component**. It is what you need
   when the encoded value is only known on the client or changes reactively.
 
-Of the five `react-qr-code` call sites, three are structurally client-side and
-cannot migrate:
+Of the five `react-qr-code` call sites, only one was worth migrating:
 
-| Call site                                              | Value source                           | Migratable |
-| ------------------------------------------------------ | -------------------------------------- | ---------- |
-| qkit `order/[boothId]/[orderNumber]/page.tsx`           | `pickupUrl`, known server-side         | yes        |
-| qkit `order/[boothId]/pay/pay-form.tsx`                 | `checkout.payload` prop from its server parent | yes, with test rework |
-| qkit `dashboard/booths/[boothId]/qr/booth-qr-poster.tsx` | origin resolved client-side via `useSyncExternalStore`, deliberately, to avoid an SSR hydration mismatch | no |
-| paykit `dashboard/bookings/[id]/qr-code-view.tsx`       | `transaction.qr_payload` from its server parent | yes |
-| paykit `dashboard/config/payment-config-form.tsx`       | `previewPayload` derived live from form state | no |
+| Call site                                                | Value source                                                                                            | Migrated                       |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| paykit `dashboard/bookings/[id]/qr-code-view.tsx`         | `transaction.qr_payload` from its server parent                                                          | yes, 2026-09-19 (wrapper deleted) |
+| paykit `dashboard/config/payment-config-form.tsx`         | `previewPayload` derived live from form state                                                            | no — client-only by nature     |
+| qkit `dashboard/booths/[boothId]/qr/booth-qr-poster.tsx`  | origin resolved client-side via `useSyncExternalStore`, deliberately, to avoid an SSR hydration mismatch | no — client-only by nature     |
+| qkit `order/[boothId]/pay/pay-form.tsx`                   | `checkout.payload` prop from its server parent                                                           | no — see below                 |
+| qkit `order/[boothId]/[orderNumber]/page.tsx`             | `pickupUrl`, known server-side                                                                            | no — see below                 |
 
-Because at least one client-side site remains in each kit, **`react-qr-code`
-stays a dependency of qkit and paykit either way**. Migrating the server-side
-sites consolidates on the shared helper and trims those routes' client bundles;
-it does not remove a dependency.
+`pay-form.tsx` is technically migratable and deliberately left alone. Its QR is
+rasterized to PNG by `qr-image.ts`, which insets the image ~8% specifically
+because `react-qr-code` serializes with **zero** margin, and bank apps scanning
+a saved photo can fail to decode a QR whose modules run edge-to-edge. `qrSvg`
+emits `margin: 1` instead, so swapping renderers changes the effective quiet
+zone on a live payment path. That is not a trade worth making for a bundle-size
+win.
+
+`[orderNumber]/page.tsx` is already a Server Component, so `react-qr-code` never
+reaches the browser there. Migrating it would buy nothing, and would cost the
+test mock that currently asserts exactly which URL `resolveOrigin` embedded.
+It would also leave qkit split across two QR mechanisms rather than one.
+
+**`react-qr-code` therefore stays a dependency of both qkit and paykit.** The
+paykit migration removed a client wrapper and trimmed one route's bundle; it
+did not remove a dependency, and no further migration is planned.
 
 ## Internal exports (zero direct importers, all load-bearing)
 
