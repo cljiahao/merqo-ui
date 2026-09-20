@@ -42,7 +42,12 @@ export async function resizeToWebp(
     if (!blob) throw new Error("encode failed");
     return { blob, ext: "webp", type: "image/webp" };
   } catch {
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    // A dotless filename has no extension to take -- `split(".").pop()`
+    // would return the whole name (e.g. ext: "photo"), which then lands in
+    // the upload path. stockkit's copy guarded this; the others did not.
+    const ext = file.name.includes(".")
+      ? file.name.split(".").pop()?.toLowerCase() || "jpg"
+      : "jpg";
     return { blob: file, ext, type: file.type || "application/octet-stream" };
   }
 }
