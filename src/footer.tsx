@@ -19,6 +19,11 @@ export interface FooterProps {
    * its authenticated dashboard, where a sign-in link is meaningless.
    */
   showSignIn?: boolean;
+  /**
+   * Copy for the sign-in link. merqo is the hub, where "Vendor sign in"
+   * reads oddly, so it passes "Sign in ->" (with a real arrow).
+   */
+  signInLabel?: React.ReactNode;
 }
 
 // Shell only, same "fix drift in the shared shape" rationale as LandingNav:
@@ -34,6 +39,7 @@ export function Footer({
   kitName,
   copyright,
   showSignIn = true,
+  signInLabel = "Vendor sign in →",
 }: FooterProps): React.ReactElement {
   return (
     <footer className="border-t border-border">
@@ -49,7 +55,7 @@ export function Footer({
         <LegalFooterLinks />
         {showSignIn && (
           <a href="/login" className="hover:text-foreground">
-            Vendor sign in →
+            {signInLabel}
           </a>
         )}
       </div>

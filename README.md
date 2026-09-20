@@ -398,7 +398,9 @@ was otherwise identical: `showSignIn?: boolean` (default `true`) hides the
 vendor sign-in link, for stockkit, which renders the same footer inside its
 authenticated dashboard; and `copyright?: ReactNode` replaces the whole
 copyright line, for merqo, which is the hub rather than a kit and so should
-not say "a Merqo kit".
+not say "a Merqo kit". `signInLabel?: ReactNode` (default
+`"Vendor sign in →"`) overrides that link's copy, again for merqo, where
+"Vendor sign in" reads oddly on the hub's own landing page.
 
 - `BackToTop` — fixed bottom-right back-to-top button for a long landing
   page. Appears past ~600px of scroll, scrolls smoothly unless the visitor

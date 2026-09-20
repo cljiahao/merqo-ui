@@ -56,4 +56,22 @@ describe("Footer", () => {
     expect(screen.getByText("© 2026 Merqo")).toBeInTheDocument();
     expect(screen.queryByText(/a Merqo kit/)).not.toBeInTheDocument();
   });
+
+  it("overrides the sign-in copy when signInLabel is given", () => {
+    render(
+      <Footer
+        wordmark={<a href="/">Merqo</a>}
+        tagline="t"
+        kitName="merqo"
+        signInLabel="Sign in →"
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Sign in →" })).toHaveAttribute(
+      "href",
+      "/login",
+    );
+    expect(
+      screen.queryByRole("link", { name: /vendor sign in/i }),
+    ).not.toBeInTheDocument();
+  });
 });
