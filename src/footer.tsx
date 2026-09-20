@@ -9,6 +9,16 @@ export interface FooterProps {
   tagline: React.ReactNode;
   /** Lowercase kit name for the copyright line, e.g. "qkit". */
   kitName: string;
+  /**
+   * Replaces the whole copyright line. merqo is the hub, not a kit, so it
+   * renders "(c) 2026 Merqo" with no "a Merqo kit" suffix.
+   */
+  copyright?: React.ReactNode;
+  /**
+   * Hides the vendor sign-in link. stockkit renders this same footer inside
+   * its authenticated dashboard, where a sign-in link is meaningless.
+   */
+  showSignIn?: boolean;
 }
 
 // Shell only, same "fix drift in the shared shape" rationale as LandingNav:
@@ -22,20 +32,26 @@ export function Footer({
   wordmark,
   tagline,
   kitName,
+  copyright,
+  showSignIn = true,
 }: FooterProps): React.ReactElement {
   return (
     <footer className="border-t border-border">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-sm text-muted-foreground sm:flex-row">
         {wordmark}
         <span>{tagline}</span>
-        <span className="text-xs">© 2026 {kitName} · a Merqo kit</span>
+        <span className="text-xs">
+          {copyright ?? `© 2026 ${kitName} · a Merqo kit`}
+        </span>
         <a href="/about" className="hover:text-foreground">
           About
         </a>
         <LegalFooterLinks />
-        <a href="/login" className="hover:text-foreground">
-          Vendor sign in →
-        </a>
+        {showSignIn && (
+          <a href="/login" className="hover:text-foreground">
+            Vendor sign in →
+          </a>
+        )}
       </div>
     </footer>
   );

@@ -17,9 +17,7 @@ describe("Footer", () => {
   });
 
   it("renders About, legal, and sign-in links", () => {
-    render(
-      <Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" />,
-    );
+    render(<Footer wordmark={<a href="/">Kit</a>} tagline="t" kitName="kit" />);
     expect(screen.getByRole("link", { name: "About" })).toHaveAttribute(
       "href",
       "/about",
@@ -29,5 +27,33 @@ describe("Footer", () => {
     ).toHaveAttribute("href", "/login");
     expect(screen.getByRole("link", { name: "Terms" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Privacy" })).toBeInTheDocument();
+  });
+
+  it("hides the sign-in link when showSignIn is false", () => {
+    render(
+      <Footer
+        wordmark={<a href="/">Kit</a>}
+        tagline="t"
+        kitName="kit"
+        showSignIn={false}
+      />,
+    );
+    expect(
+      screen.queryByRole("link", { name: /vendor sign in/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
+  });
+
+  it("replaces the whole copyright line when copyright is given", () => {
+    render(
+      <Footer
+        wordmark={<a href="/">Merqo</a>}
+        tagline="t"
+        kitName="merqo"
+        copyright="© 2026 Merqo"
+      />,
+    );
+    expect(screen.getByText("© 2026 Merqo")).toBeInTheDocument();
+    expect(screen.queryByText(/a Merqo kit/)).not.toBeInTheDocument();
   });
 });
