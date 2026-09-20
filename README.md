@@ -99,7 +99,11 @@ uploads a photo:
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "<project-ref>.supabase.co", pathname: "/storage/v1/object/public/**" },
+      {
+        protocol: "https",
+        hostname: "<project-ref>.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
 };
@@ -157,7 +161,7 @@ works locally.
   `description?: string`, optional `tooltip?: ReactNode` (rich content, not
   just a string). Kit-specific skins (e.g. a paper texture) layer on top via
   `className`, not baked into the component. Optional `wrapper?: (content:
-  ReactNode) => ReactNode` overrides the default `<section>` shell entirely
+ReactNode) => ReactNode` overrides the default `<section>` shell entirely
   (e.g. a kit's own bordered/textured card) — when set, `className` and the
   default bg-card/border/shadow classes don't apply.
 - `FeedbackSheet` / `HelpSheet` — drawer-based feedback and support forms.
@@ -251,7 +255,7 @@ works locally.
 - `DashboardTours` — route-matched router for kits with more than one
   dashboard page tour. Takes `tours: {id, route, steps}[]`, the caller's
   current `pathname`, `seenTourIds: string[]`, and `onFirstSeen: (tourId) =>
-  Promise<void>`. Picks the tour whose `route` most specifically matches
+Promise<void>`. Picks the tour whose `route` most specifically matches
   `pathname` (longest match wins, so a nested route like
   `/dashboard/booths/abc123` still resolves to the `/dashboard/booths` tour)
   and mounts only that one via `DashboardTour` internally — a page with no
@@ -316,7 +320,7 @@ works locally.
   down-state color — only the up-state emerald is fixed across the family.
 - `StatusBadge<T>({status, config})` — the dot + uppercase-tracked
   bordered-pill status chip shared across kits. `config: Record<T,
-  {label, className}>` is caller-supplied (same "caller supplies the map"
+{label, className}>` is caller-supplied (same "caller supplies the map"
   contract `AuditLogTable`'s `formatAction` established), so each kit keeps
   its own status set and colors — only the rendering shape (dot, border,
   tint, tracking) is shared. Extracted from qkit's original implementation
@@ -350,12 +354,12 @@ works locally.
   real brand marks and official colors (`@icons-pack/react-simple-icons`,
   `color="default"`); `website` gets a generic `lucide-react` globe tinted
   via `currentColor` instead. `SocialLinksFields({value, onChange,
-  idPrefix})` is the ready-made form-field group built on it (labeled
+idPrefix})` is the ready-made form-field group built on it (labeled
   inputs, `idPrefix` namespaces each field's `id` when a page renders more
   than one instance). Promoted 2026-09-16 — same field list and form was
   independently duplicated in all 4 kits.
 - `MoneyInput({cents, onCommit, ...inputProps})` / `useMoneyField(cents,
-  onCommit)` — a controlled dollar-amount `<Input>`. Reformats to the
+onCommit)` — a controlled dollar-amount `<Input>`. Reformats to the
   canonical 2-decimal string only on blur (or on an external `cents`
   change while unfocused), not on every keystroke — reformatting live
   resets the caret to the end after each key, so typing "6.50"
@@ -388,6 +392,34 @@ works locally.
   wordmark/tagline/kit-name) — see the design-critique sweep's footer-
   parity work, which made them look identical without ever actually
   sharing the component.
+
+`Footer` also takes two optional props for the two consumers whose footer
+was otherwise identical: `showSignIn?: boolean` (default `true`) hides the
+vendor sign-in link, for stockkit, which renders the same footer inside its
+authenticated dashboard; and `copyright?: ReactNode` replaces the whole
+copyright line, for merqo, which is the hub rather than a kit and so should
+not say "a Merqo kit".
+
+- `BackToTop` — fixed bottom-right back-to-top button for a long landing
+  page. Appears past ~600px of scroll, scrolls smoothly unless the visitor
+  prefers reduced motion. Promoted 2026-09-19; was byte-identical in qkit,
+  paykit, loopkit and merqo, and differed only in comments in stockkit.
+- `GoogleMark` — Google's "G" mark for the Google OAuth button on every
+  kit's login page. Promoted 2026-09-19; was identical in all five.
+- `safeRedirectPath(next, fallback)` — open-redirect guard. Accepts only a
+  same-origin relative path, rejecting `//`, `/\` and embedded control
+  characters. Plain function, no React. Promoted 2026-09-19.
+- `resizeToWebp(file, maxDim, quality?)` — client-side resize + WebP
+  re-encode before upload, returning `{ blob, ext, type }` and falling back
+  to the original file if the browser cannot decode or encode it. Applies
+  EXIF orientation so portrait phone photos are not sideways. Browser-only
+  (Canvas). Promoted 2026-09-19. Each kit keeps its own upload adapter (the
+  Storage bucket and path are kit-specific); only the resize step is shared.
+
+These four are the first exports that are not React components. Since
+v0.31.0 the package no longer applies a package-wide `"use client"` banner,
+so a plain function like `safeRedirectPath` is a real value in a Server
+Component rather than an opaque client-reference stub.
 
 ## Z-index scale
 
@@ -422,7 +454,7 @@ button, etc.
 
 Not a shared library — each kit owns its own Supabase schema and writes its
 own migration, same as everywhere else in the family (no cross-schema
-queries, no shared server code). This section documents the *shape* every
+queries, no shared server code). This section documents the _shape_ every
 kit's audit trail should follow, the same way the Z-index scale above
 documents a convention without shipping a shared constant. Written here
 (2026-08-18) after a ground-truth check found the pattern already exists,
@@ -452,7 +484,7 @@ each kit's admin surface.
 **Write path** — a small `recordAudit()` helper (paykit's
 `src/app/admin/actions.ts` is the reference implementation) that inserts a
 row and swallows its own failure: the action being recorded must never fail
-*because* logging it failed, but a logging failure should still surface in
+_because_ logging it failed, but a logging failure should still surface in
 server logs so a broken trail doesn't go unnoticed.
 
 **Coverage** — log every mutating action a vendor or an admin could
@@ -460,7 +492,7 @@ plausibly need to reconstruct or dispute later (plan changes, pricing
 changes, refunds, payment confirmations, cancellations, redemptions), not
 only today's `/admin`-route actions. A cross-kit write initiated by merqo
 on a vendor's behalf (e.g. a hub-triggered plan override) should also land
-a row in the *target* kit's own `admin_audit`, attributed to the merqo
+a row in the _target_ kit's own `admin_audit`, attributed to the merqo
 system actor — never a silent service-role bypass.
 
 **Domain ledgers count too** — a kit's own append-only domain data (e.g.
