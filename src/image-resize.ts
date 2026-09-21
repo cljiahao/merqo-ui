@@ -10,7 +10,9 @@ async function decode(file: File): Promise<ImageBitmap> {
 }
 
 /**
- * Resize `file` so its longest side is <= maxDim and re-encode as WebP.
+ * Resize `file` so its longest side is <= maxDim and re-encode as WebP,
+ * or as JPEG where the browser cannot encode WebP. The returned `type` and
+ * `ext` always describe the bytes actually produced.
  * Scaling a phone photo down is the biggest size win before compression, and
  * WebP is ~25-35% smaller than JPEG at the same quality. Browser-only
  * (Canvas) -- call from client components. Returns the original untouched if
@@ -36,11 +38,25 @@ export async function resizeToWebp(
     ctx.drawImage(bitmap, 0, 0, w, h);
     bitmap.close?.();
 
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/webp", quality),
-    );
-    if (!blob) throw new Error("encode failed");
-    return { blob, ext: "webp", type: "image/webp" };
+    const encode = (type: string) =>
+      new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, type, quality),
+      );
+
+    // A browser that can't encode WebP does not fail here: per the canvas
+    // spec it silently returns a PNG instead. Trusting the requested type
+    // would mislabel that PNG as image/webp, and a PNG of a photo is several
+    // times larger than the JPEG it should have been. Check what actually
+    // came back, and fall back to JPEG, which every browser encodes.
+    const webp = await encode("image/webp");
+    if (webp?.type === "image/webp") {
+      return { blob: webp, ext: "webp", type: "image/webp" };
+    }
+    const jpeg = await encode("image/jpeg");
+    if (jpeg?.type === "image/jpeg") {
+      return { blob: jpeg, ext: "jpg", type: "image/jpeg" };
+    }
+    throw new Error("encode failed");
   } catch {
     // A dotless filename has no extension to take -- `split(".").pop()`
     // would return the whole name (e.g. ext: "photo"), which then lands in
