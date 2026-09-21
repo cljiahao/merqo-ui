@@ -413,7 +413,12 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
   characters. Plain function, no React. Promoted 2026-09-19.
 - `resizeToWebp(file, maxDim, quality?)` — client-side resize + WebP
   re-encode before upload, returning `{ blob, ext, type }` and falling back
-  to the original file if the browser cannot decode or encode it. Applies
+  to the original file if the browser cannot decode or encode it. Where a
+  browser cannot encode WebP it re-encodes as JPEG instead (v0.31.3): per
+  the canvas spec an unsupported `toBlob` type silently yields a PNG, which
+  earlier versions mislabelled as `image/webp` and which is several times
+  larger than a JPEG of the same photo. `type`/`ext` always describe the
+  bytes actually produced. Applies
   EXIF orientation so portrait phone photos are not sideways. Browser-only
   (Canvas). Promoted 2026-09-19. Each kit keeps its own upload adapter (the
   Storage bucket and path are kit-specific); only the resize step is shared.
