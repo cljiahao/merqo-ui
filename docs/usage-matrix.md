@@ -10,7 +10,7 @@ that export at all. Last regenerated 2026-09-21.
 
 ## Why this file exists
 
-Two reasons, both learned the hard way:
+Three reasons, all learned the hard way:
 
 1. A component promoted into this package is only worth the shared-package tax
    if kits actually adopt it. Counting direct imports is the only way to see an
@@ -41,12 +41,11 @@ Two reasons, both learned the hard way:
 | `TermsAcceptanceCheckbox`                                 | 1    | 1      | 1        | 1       | 1     |
 | `TwoColumnSections`                                       | 2    | 1      | 1        | 1       | 1     |
 | `useAsyncAction` / `navigatingAway`                       | 1    | 1      | 1        | 1       | 1     |
-| `BackToTop`                                               | 1    | \*     | 1        | 1       | 1     |
-| `GoogleMark`                                              | 1    | \*     | 1        | 1       | 1     |
-| `safeRedirectPath`                                        | 2    | \*     | 2        | 2       | 2     |
-| `resizeToWebp`                                            | 6    | \*     | 1        | 1       | 1     |
-
-`*` marks an export adopted in paykit's open PR #113, not yet on its `main`.
+| `BackToTop`                                               | 1    | 1      | 1        | 1       | 1     |
+| `GoogleMark`                                              | 1    | 1      | 1        | 1       | 1     |
+| `safeRedirectPath`                                        | 2    | 2      | 2        | 2       | 2     |
+| `resizeToWebp`                                            | 6    | 2      | 1        | 1       | 1     |
+| `SocialLinksFields`                                       | 2    | 1      | 1        | 1       | 1     |
 
 The last four were promoted on 2026-09-19 after a sweep found them duplicated
 in every repo. They are the package's first non-component exports, which only
@@ -61,7 +60,7 @@ plan page, and no kit switcher. Its absence here is by design, not a gap.
 | ------------------------------- | ---- | ------ | -------- | ------- | ----- |
 | `BackButton`                    | 2    | 2      | 2        | 7       | —     |
 | `DashboardNav`                  | 1    | 1      | 1        | 1       | —     |
-| `DataTable` + `DataTableColumn` | 2    | 2      | 1        | 3       | —     |
+| `DataTable` + `DataTableColumn` | 2    | 4      | 1        | 3       | —     |
 | `getSwitchKits`                 | 1    | 1      | 1        | 1       | —     |
 | `PricingForm`                   | 1    | 1      | 1        | 1       | —     |
 
@@ -74,7 +73,6 @@ difference, recorded so the next audit does not re-litigate it.
 | -------------------------- | ---- | ------ | -------- | ------- | ----- | ------------------------------------------------------------------- |
 | `StatusBadge` (+ `Config`) | 3    | 2      | 1        | —       | 1     | loopkit's admin health pill is a shadcn `Badge` — see below         |
 | `InfoTooltip`              | 5    | 1      | —        | 2       | 2     | stockkit has no tooltip surface (checked: no `title=` hints either) |
-| `SocialLinksFields`        | 2    | \*     | 1        | 1       | 1     | paykit adopts it in #113                                            |
 | `DashboardTour`            | —    | 1      | 1        | 1       | 1     | qkit uses `DashboardTours` (plural, route-matched) instead          |
 | `PlanComparisonTable`      | 1    | —      | —        | 1       | —     | paykit/stockkit plan pages render a feature list, not a table       |
 | `MoneyInput`               | 2    | —      | —        | —       | —     | see "Money fields" below                                            |
@@ -90,7 +88,7 @@ The 2026-09-19 sweep checked all 23 local components sharing a name with a
 shared export. Twenty-one were thin adapters that import the shared one and
 only supply kit copy — every repo's `DashboardNav`, `DashboardTour`,
 `use-async-action`, `Section` and landing footer wrapper. The genuine
-duplicates were all removed, except paykit's, which #113 removes.
+duplicates were all removed.
 
 Three more were flagged and then cleared on inspection:
 
