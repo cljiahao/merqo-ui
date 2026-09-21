@@ -6,7 +6,7 @@ all five consumer repos as sibling folders.
 
 Numbers are **import sites** (import statements), not files — a component
 imported in six files counts six. A blank cell means the kit does not import
-that export at all. Last regenerated 2026-09-19.
+that export at all. Last regenerated 2026-09-21.
 
 ## Why this file exists
 
@@ -15,10 +15,14 @@ Two reasons, both learned the hard way:
 1. A component promoted into this package is only worth the shared-package tax
    if kits actually adopt it. Counting direct imports is the only way to see an
    export that was built to replace something and then never adopted.
-2. Counting direct imports alone is **misleading**. Five exports have zero
+2. Counting direct imports alone is **misleading**. Six exports have zero
    direct importers and are still load-bearing, because a kit reaches them
    through another component. An audit that trusted the raw count concluded
    they were dead code; they are not. See "Internal exports" below.
+3. Half of what looks like duplication is not. Most same-named local
+   components are thin adapters over the shared one, and several real
+   differences are deliberate. Recording which is which is the only way an
+   audit does not re-open the same questions every time.
 
 ## Fully adopted (all five consumers)
 
@@ -27,6 +31,7 @@ Two reasons, both learned the hard way:
 | `AboutMerqo`                                              | 1    | 1      | 1        | 1       | 1     |
 | `AuditLogTable` + `AuditLogEntry`                         | 4    | 3      | 3        | 3       | 3     |
 | `ElevatedCard`                                            | 1    | 6      | 10       | 19      | 1     |
+| `Footer`                                                  | 1    | 1      | 1        | 1       | 1     |
 | `ImageUploader` (+ `ImageUploaderProps`)                  | 5    | 3      | 1        | 2       | 2     |
 | `LandingNav`                                              | 1    | 1      | 1        | 1       | 1     |
 | `LegalDocument`                                           | 2    | 2      | 2        | 2       | 4     |
@@ -36,6 +41,16 @@ Two reasons, both learned the hard way:
 | `TermsAcceptanceCheckbox`                                 | 1    | 1      | 1        | 1       | 1     |
 | `TwoColumnSections`                                       | 2    | 1      | 1        | 1       | 1     |
 | `useAsyncAction` / `navigatingAway`                       | 1    | 1      | 1        | 1       | 1     |
+| `BackToTop`                                               | 1    | \*     | 1        | 1       | 1     |
+| `GoogleMark`                                              | 1    | \*     | 1        | 1       | 1     |
+| `safeRedirectPath`                                        | 2    | \*     | 2        | 2       | 2     |
+| `resizeToWebp`                                            | 6    | \*     | 1        | 1       | 1     |
+
+`*` marks an export adopted in paykit's open PR #113, not yet on its `main`.
+
+The last four were promoted on 2026-09-19 after a sweep found them duplicated
+in every repo. They are the package's first non-component exports, which only
+became safe to share once the package-wide `"use client"` banner was removed.
 
 ## Product kits only
 
@@ -46,92 +61,75 @@ plan page, and no kit switcher. Its absence here is by design, not a gap.
 | ------------------------------- | ---- | ------ | -------- | ------- | ----- |
 | `BackButton`                    | 2    | 2      | 2        | 7       | —     |
 | `DashboardNav`                  | 1    | 1      | 1        | 1       | —     |
-| `DataTable` + `DataTableColumn` | 2    | 4      | 2        | 6       | —     |
+| `DataTable` + `DataTableColumn` | 2    | 2      | 1        | 3       | —     |
 | `getSwitchKits`                 | 1    | 1      | 1        | 1       | —     |
 | `PricingForm`                   | 1    | 1      | 1        | 1       | —     |
 
 ## Partial adoption
 
-| Export                     | qkit | paykit | stockkit | loopkit | merqo | Note                                                                         |
-| -------------------------- | ---- | ------ | -------- | ------- | ----- | ---------------------------------------------------------------------------- |
-| `StatusBadge` (+ `Config`) | 3    | 3      | 1        | —       | 1     | loopkit's admin health pill uses a shadcn `Badge` — see "Local duplicates"   |
-| `InfoTooltip`              | 5    | 1      | —        | 2       | 2     | stockkit has no tooltip surface (checked: no `title=` hints either)          |
-| `SocialLinksFields`        | 2    | —      | 1        | 1       | 1     | paykit keeps a local copy — see "Local duplicates"                           |
-| `DashboardTour`            | —    | 1      | 1        | 1       | 1     | qkit uses `DashboardTours` (plural, route-matched) instead                   |
-| `Footer`                   | 1    | 1      | —        | 1       | —     | stockkit and merqo keep near-identical local copies — see "Local duplicates" |
-| `LegalFooterLinks`         | —    | —      | 1        | —       | 1     | qkit/paykit/loopkit get it composed inside `Footer`                          |
-| `PlanComparisonTable`      | 1    | —      | —        | 1       | —     | paykit/stockkit plan pages render a feature list, not a table                |
-| `MoneyInput`               | 2    | —      | —        | —       | —     | paykit and stockkit hand-roll money fields — see "Local duplicates"          |
-| `DeltaPill`                | 1    | —      | —        | —       | —     | qkit only                                                                    |
-| `SOCIAL_LINK_FIELDS`       | 1    | —      | —        | —       | —     | qkit only; the 2026-09-18 RSC crash site                                     |
-| `AccountMenu` (direct)     | —    | —      | —        | —       | 1     | the four kits get it composed inside `DashboardNav`                          |
-| `VendorTelegramSection`    | —    | —      | —        | —       | 1     | merqo owns the shared bot; kits link through it                              |
-| `qrSvg`                    | —    | 1      | —        | 4       | 1     | not a `react-qr-code` replacement — see below                                |
+Every row here has been checked. None of it is drift; each is a deliberate
+difference, recorded so the next audit does not re-litigate it.
 
-## Local duplicates (open)
+| Export                     | qkit | paykit | stockkit | loopkit | merqo | Why                                                                 |
+| -------------------------- | ---- | ------ | -------- | ------- | ----- | ------------------------------------------------------------------- |
+| `StatusBadge` (+ `Config`) | 3    | 2      | 1        | —       | 1     | loopkit's admin health pill is a shadcn `Badge` — see below         |
+| `InfoTooltip`              | 5    | 1      | —        | 2       | 2     | stockkit has no tooltip surface (checked: no `title=` hints either) |
+| `SocialLinksFields`        | 2    | \*     | 1        | 1       | 1     | paykit adopts it in #113                                            |
+| `DashboardTour`            | —    | 1      | 1        | 1       | 1     | qkit uses `DashboardTours` (plural, route-matched) instead          |
+| `PlanComparisonTable`      | 1    | —      | —        | 1       | —     | paykit/stockkit plan pages render a feature list, not a table       |
+| `MoneyInput`               | 2    | —      | —        | —       | —     | see "Money fields" below                                            |
+| `DeltaPill`                | 1    | —      | —        | —       | —     | qkit only                                                           |
+| `SOCIAL_LINK_FIELDS`       | 1    | —      | —        | —       | —     | qkit only; the 2026-09-18 RSC crash site                            |
+| `AccountMenu` (direct)     | —    | —      | —        | —       | 1     | the four kits get it composed inside `DashboardNav`                 |
+| `VendorTelegramSection`    | —    | —      | —        | —       | 1     | merqo owns the shared bot; kits link through it                     |
+| `qrSvg`                    | —    | 1      | —        | 4       | 1     | not a `react-qr-code` replacement — see below                       |
 
-Found by a 2026-09-19 sweep of every kit's `origin/main`. A local component
-that shares a name with a shared export is usually a thin adapter — every
-kit's `DashboardNav`, `DashboardTour`, `use-async-action`, `Section` and
-landing `Footer` wrapper imports the shared one and only supplies kit copy.
-These are the ones that do **not**, and so can drift:
+### Things that look like duplicates and are not
 
-| Kit      | Local code                                                                                                    | Shared equivalent                         | Why it has not moved yet                                                                                             |
-| -------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| paykit   | `components/social-icons.tsx`, `components/social-links-fields.tsx`                                           | `SOCIAL_LINK_FIELDS`, `SocialLinksFields` | deliberate in paykit 0.1.9: plain lucide glyphs instead of brand marks. A design decision, not drift                 |
-| stockkit | `components/layout/site-footer.tsx`                                                                           | `Footer`                                  | identical layout, but also rendered on the dashboard with the sign-in link hidden; `Footer` has no `showSignIn` prop |
-| merqo    | `components/landing/footer.tsx`                                                                               | `Footer`                                  | identical layout, but hub copy (`© 2026 Merqo`, not `· a Merqo kit`); `Footer` hardcodes the kit suffix              |
-| paykit   | `bookings/booking-table.tsx`, `transactions/transaction-table.tsx`                                            | `DataTable`                               | still shadcn `Table`; the earnings and admin-vendors tables already moved                                            |
-| paykit   | deposit/balance/refund fields in `bookings/new-booking-dialog.tsx`, `bookings/[id]/cancel-booking-dialog.tsx` | `MoneyInput`                              | raw `type="number" step="0.01"`                                                                                      |
-| stockkit | "Unit cost ($)" in `products/product-form.tsx`                                                                | `MoneyInput`                              | raw `inputMode="decimal"`                                                                                            |
-| loopkit  | `admin/health-badge.ts` (shadcn `Badge` variants)                                                             | `StatusBadge`                             | not yet evaluated whether health triage fits the dot+pill shape                                                      |
+The 2026-09-19 sweep checked all 23 local components sharing a name with a
+shared export. Twenty-one were thin adapters that import the shared one and
+only supply kit copy — every repo's `DashboardNav`, `DashboardTour`,
+`use-async-action`, `Section` and landing footer wrapper. The genuine
+duplicates were all removed, except paykit's, which #113 removes.
 
-loopkit's other `type="number"` fields (stamps, points, visit counts) are
-counts, not money, and are correctly not `MoneyInput`.
+Three more were flagged and then cleared on inspection:
 
-Internal modules with no `index.ts` export — `async-submit-button.tsx` and
-`pill-radio-group.tsx` — are composed by `FeedbackSheet`, `HelpSheet` and
-`PricingForm`, so they are live, not stray.
+**loopkit's `admin/health-badge.ts`** maps health states to shadcn `Badge`
+variants. `StatusBadge` is a dot-and-pill chip whose own docs say it is
+deliberately _not_ a `Badge` wrapper, and the `gold` variant here is
+loopkit's reward motif. Converting would change the look and drop a brand
+token.
+
+**Money fields** in stockkit (`products/product-form.tsx`,
+`stock-log-form.tsx`) and paykit (the bookings dialogs) hold a free-text
+string and show a tested inline "Enter a valid unit cost" error.
+`MoneyInput` is cents-based and commits on blur with no error affordance,
+so adopting it would delete tested behaviour rather than remove duplication.
+
+**qkit's payment QRs** — see immediately below.
 
 ### `qrSvg` is not a replacement for `react-qr-code`
 
 An earlier audit called qkit's and paykit's continued `react-qr-code`
-dependency an adoption gap. It is not. The two solve different problems and
-neither can replace the other:
+dependency an adoption gap left by a component built to replace it. That
+framing was wrong.
 
-- `qrSvg(text)` is **async** and returns an SVG **markup string**. It only
-  works in a Server Component or server action, where the caller `await`s it
-  and passes the result down as a plain string prop. Every loopkit and merqo
-  call site has that shape.
-- `react-qr-code` is a **synchronous React component**. It is what you need
-  when the encoded value is only known on the client or changes reactively.
+`qrSvg(text)` is **async** and returns an SVG **markup string**, so it only
+works where the value is known at render time on the server.
+`react-qr-code` is a **synchronous component**, which is what you need when
+the value is known only on the client or changes reactively.
 
-Of the five `react-qr-code` call sites, only one was worth migrating:
+Of the five call sites, one was worth migrating (paykit's bookings wrapper,
+done 2026-09-19). The rest stay:
 
-| Call site                                                | Value source                                                                                             | Migrated                          |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| paykit `dashboard/bookings/[id]/qr-code-view.tsx`        | `transaction.qr_payload` from its server parent                                                          | yes, 2026-09-19 (wrapper deleted) |
-| paykit `dashboard/config/payment-config-form.tsx`        | `previewPayload` derived live from form state                                                            | no — client-only by nature        |
-| qkit `dashboard/booths/[boothId]/qr/booth-qr-poster.tsx` | origin resolved client-side via `useSyncExternalStore`, deliberately, to avoid an SSR hydration mismatch | no — client-only by nature        |
-| qkit `order/[boothId]/pay/pay-form.tsx`                  | `checkout.payload` prop from its server parent                                                           | no — see below                    |
-| qkit `order/[boothId]/[orderNumber]/page.tsx`            | `pickupUrl`, known server-side                                                                           | no — see below                    |
+| Call site                                                | Why it stays                                                                                                                                                                                                                                       |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| paykit `dashboard/config/payment-config-form.tsx`        | preview payload derived live from form state                                                                                                                                                                                                       |
+| qkit `dashboard/booths/[boothId]/qr/booth-qr-poster.tsx` | origin resolved client-side via `useSyncExternalStore`, deliberately, to avoid an SSR hydration mismatch                                                                                                                                           |
+| qkit `order/[boothId]/pay/pay-form.tsx`                  | `qr-image.ts` insets the rasterized PNG ~8% because `react-qr-code` emits zero margin, and bank apps scanning a saved photo can fail on edge-to-edge modules. `qrSvg` emits `margin: 1`, so swapping changes the quiet zone on a live payment path |
+| qkit `order/[boothId]/[orderNumber]/page.tsx`            | already a Server Component, so `react-qr-code` never reaches the browser; migrating buys nothing and costs the test mock that pins which URL `resolveOrigin` embedded                                                                              |
 
-`pay-form.tsx` is technically migratable and deliberately left alone. Its QR is
-rasterized to PNG by `qr-image.ts`, which insets the image ~8% specifically
-because `react-qr-code` serializes with **zero** margin, and bank apps scanning
-a saved photo can fail to decode a QR whose modules run edge-to-edge. `qrSvg`
-emits `margin: 1` instead, so swapping renderers changes the effective quiet
-zone on a live payment path. That is not a trade worth making for a bundle-size
-win.
-
-`[orderNumber]/page.tsx` is already a Server Component, so `react-qr-code` never
-reaches the browser there. Migrating it would buy nothing, and would cost the
-test mock that currently asserts exactly which URL `resolveOrigin` embedded.
-It would also leave qkit split across two QR mechanisms rather than one.
-
-**`react-qr-code` therefore stays a dependency of both qkit and paykit.** The
-paykit migration removed a client wrapper and trimmed one route's bundle; it
-did not remove a dependency, and no further migration is planned.
+**`react-qr-code` therefore stays a dependency of both qkit and paykit.**
 
 ## Internal exports (zero direct importers, all load-bearing)
 
@@ -145,6 +143,7 @@ is reached through another export. Removing any of them breaks its consumer.
 | `KIT_FAMILY`                 | `getSwitchKits` | all four kits |
 | `getEndCustomerNoticeSource` | `LegalDocument` | all five      |
 | `useMoneyField`              | `MoneyInput`    | qkit          |
+| `LegalFooterLinks`           | `Footer`        | all five      |
 
 Note that `FeedbackData` and `SupportRequest` are **not** internal even though
 their components are: both appear in `AccountMenuProps`
@@ -153,7 +152,8 @@ typing that callback explicitly needs them. Keep the type exports.
 
 ## Server-component rule
 
-Every component in this package is a Client Component. A Server Component may
+Every **component** in this package is a Client Component (the four
+non-component exports are not). A Server Component may
 pass one only serializable props — never a function, and never a component
 reference such as `LinkComponent={Link}`. Both crash at request time with
 `Functions cannot be passed directly to Client Components`, which `next build`
