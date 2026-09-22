@@ -423,7 +423,14 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
   (Canvas). Promoted 2026-09-19. Each kit keeps its own upload adapter (the
   Storage bucket and path are kit-specific); only the resize step is shared.
 
-These four are the first exports that are not React components. Since
+- `storagePathFromPublicUrl(url, bucket)` — maps a Supabase Storage public
+  URL back to its object path in `bucket`, so a caller can delete an image
+  it is replacing. Returns `null` for anything that is not a public URL in
+  that exact bucket, most importantly an OAuth provider's avatar (a Google
+  profile picture lands in the same `avatar_url` field), which must never be
+  treated as ours to delete. Plain function, no React. Added v0.31.4.
+
+These are the first exports that are not React components. Since
 v0.31.0 the package no longer applies a package-wide `"use client"` banner,
 so a plain function like `safeRedirectPath` is a real value in a Server
 Component rather than an opaque client-reference stub.

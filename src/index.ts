@@ -88,3 +88,4 @@ export { GoogleMark } from "./google-mark";
 export { safeRedirectPath } from "./safe-redirect";
 export { resizeToWebp } from "./image-resize";
 export type { ResizeResult } from "./image-resize";
+export { storagePathFromPublicUrl } from "./storage-path";

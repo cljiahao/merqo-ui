@@ -42,6 +42,7 @@ const ENTRIES = {
   "social-links-fields": "src/social-links-fields.tsx",
   "stat-tile": "src/stat-tile.tsx",
   "status-badge": "src/status-badge.tsx",
+  "storage-path": "src/storage-path.ts",
   "two-column-sections": "src/two-column-sections.tsx",
   "use-async-action": "src/use-async-action.ts",
   "use-money-field": "src/use-money-field.ts",
