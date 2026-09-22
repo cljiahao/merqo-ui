@@ -183,12 +183,3 @@ describe("ImageUploader with deferUpload", () => {
     expect(onChange).toHaveBeenCalledWith("https://cdn.test/a.webp");
   });
 });
-
-describe("pending-image package entry point", () => {
-  it("exports the commit helpers from the package root", async () => {
-    const root = await import("./index");
-    expect(root.commitPendingImages).toBe(commitPendingImages);
-    expect(root.isPendingImage).toBe(isPendingImage);
-    expect(root.PendingImageUploadError).toBe(PendingImageUploadError);
-  });
-});

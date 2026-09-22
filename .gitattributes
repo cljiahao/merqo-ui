@@ -1,0 +1,4 @@
+# Legal documents are hashed against version-manifest.json, so their bytes
+# must match on every OS. Without this, core.autocrlf=true on Windows checks
+# them out with CRLF endings and the hash guard fails locally.
+src/legal/**/*.md text eol=lf
