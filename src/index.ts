@@ -27,6 +27,12 @@ export type {
   ImageResizeResult,
   ImagePreviewProps,
 } from "./image-uploader";
+export {
+  commitPendingImages,
+  isPendingImage,
+  PendingImageUploadError,
+} from "./pending-image";
+export type { CommittedImages } from "./pending-image";
 export { DashboardTour } from "./dashboard-tour";
 export type { DashboardTourProps, TourStep } from "./dashboard-tour";
 export { DashboardTours } from "./dashboard-tours";
