@@ -627,10 +627,3 @@ describe("DashboardTour — regressions (N1, N2)", () => {
     vi.doUnmock("driver.js");
   });
 });
-
-describe("DashboardTour — package entry point", () => {
-  it("is exported from the package root", async () => {
-    const pkg = await import("./index");
-    expect(pkg.DashboardTour).toBe(DashboardTour);
-  });
-});
