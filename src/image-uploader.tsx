@@ -4,6 +4,7 @@ import * as React from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 
 import { cn } from "./lib/utils";
+import { discardPendingImage, registerPendingImage } from "./pending-image";
 
 /** Wide booth/banner shape vs. the small square avatar/product shape. */
 export type ImageUploaderVariant = "banner" | "thumb";
@@ -68,6 +69,15 @@ export interface ImageUploaderProps {
   imageComponent?: React.ComponentType<ImagePreviewProps>;
   /** Optional hook for a kit's own toast/notification on failure. */
   onError?: (error: unknown) => void;
+  /**
+   * Upload on save instead of on pick. The picked image is resized and
+   * previewed from a local `blob:` URL, which is what `onChange` receives;
+   * nothing reaches storage until the form calls `commitPendingImages` on
+   * submit. Use it on any form with a Save button, so a vendor who picks an
+   * image and walks away leaves no orphaned object behind. Leave it off where
+   * picking is itself the save (a profile icon that saves on change).
+   */
+  deferUpload?: boolean;
   className?: string;
 }
 
@@ -154,6 +164,7 @@ export function ImageUploader({
   maxDim,
   imageComponent,
   onError,
+  deferUpload = false,
   className,
 }: ImageUploaderProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -215,8 +226,16 @@ export function ImageUploader({
         fail(message, new Error(message));
         return;
       }
-      const path = `${normalizedPathPrefix}/${randomId()}.${ext}`;
-      uploadedUrl = await onUpload({ bucket, path, blob, contentType: type });
+      const upload = () =>
+        onUpload({
+          bucket,
+          path: `${normalizedPathPrefix}/${randomId()}.${ext}`,
+          blob,
+          contentType: type,
+        });
+      uploadedUrl = deferUpload
+        ? registerPendingImage(blob, upload)
+        : await upload();
     } catch (error) {
       fail(toErrorMessage(error), error);
       return;
@@ -227,6 +246,7 @@ export function ImageUploader({
     // consumer's own onChange throws, that's the consumer's bug, not an
     // upload failure — letting it propagate avoids silently orphaning the
     // just-written storage object behind a misleading "failed" message.
+    discardPendingImage(value);
     onChange(uploadedUrl);
   }
 
@@ -256,6 +276,7 @@ export function ImageUploader({
             type="button"
             onClick={() => {
               setErrorMessage(null);
+              discardPendingImage(value);
               onChange(null);
             }}
             className="bg-background/90 text-foreground hover:bg-background absolute top-1.5 right-1.5 inline-flex size-7 items-center justify-center rounded-full shadow-sm backdrop-blur"

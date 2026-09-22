@@ -430,6 +430,21 @@ not say "a Merqo kit". `signInLabel?: ReactNode` (default
   profile picture lands in the same `avatar_url` field), which must never be
   treated as ours to delete. Plain function, no React. Added v0.31.4.
 
+- `commitPendingImages(values)`, `isPendingImage(url)`,
+  `PendingImageUploadError` — the save side of `ImageUploader`'s
+  `deferUpload` mode. With `deferUpload`, picking an image resizes it and
+  hands `onChange` a local `blob:` preview URL; nothing reaches storage.
+  On submit, the form passes its image values to `commitPendingImages`,
+  which uploads each pending one (to a fresh random path every call) and
+  returns `{ urls, uploaded }`: the values in order with previews swapped
+  for public URLs, plus the URLs it uploaded. Validate and save with
+  `urls`; if the save fails, delete `uploaded` and keep the previews in
+  state so a retry uploads again. If an upload itself fails it throws
+  `PendingImageUploadError`, whose `uploaded` lists what did upload. Use
+  `deferUpload` on every form with a Save button, so a vendor who picks an
+  image and walks away leaves no orphan in storage; leave it off where
+  picking is the save (profile icons). Added v0.32.0.
+
 These are the first exports that are not React components. Since
 v0.31.0 the package no longer applies a package-wide `"use client"` banner,
 so a plain function like `safeRedirectPath` is a real value in a Server
